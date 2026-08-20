@@ -13,11 +13,13 @@
     --text: #e8ecf1;
     --muted: #8b96a5;
     --green: #2ecc8f;
-    --green-dim: #1b5e46;
     --red: #ff6b6b;
     --yellow: #ffd166;
     --blue: #4dabf7;
     --purple: #b197fc;
+    --orange: #ffa94d;
+    --pink: #f783ac;
+    --teal: #3bc9db;
     --radius: 12px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,7 +33,6 @@
   }
   .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; }
 
-  /* ── Header y tasas ── */
   header { padding: 20px 16px 8px; }
   header h1 { font-size: 1.35rem; font-weight: 600; }
   header .sub { color: var(--muted); font-size: .85rem; }
@@ -40,38 +41,35 @@
     background: var(--panel); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 12px 14px; margin-top: 14px;
   }
-  .rate-chip { display: flex; flex-direction: column; min-width: 105px; }
+  .rate-chip { display: flex; flex-direction: column; min-width: 100px; }
   .rate-chip .lbl { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
   .rate-chip .val { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .rate-chip .val.green { color: var(--green); }
-  .rate-chip .val.yellow { color: var(--yellow); }
   .rates .actions { margin-left: auto; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
   .rates .stamp { font-size: .72rem; color: var(--muted); }
 
-  /* ── Tabs ── */
   nav {
-    display: flex; gap: 4px; margin: 16px 0 18px; overflow-x: auto;
-    border-bottom: 1px solid var(--border); padding-bottom: 0;
+    display: flex; gap: 2px; margin: 16px 0 18px; overflow-x: auto;
+    border-bottom: 1px solid var(--border);
   }
   nav button {
-    background: none; border: none; color: var(--muted); font-size: .95rem;
-    padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent;
+    background: none; border: none; color: var(--muted); font-size: .92rem;
+    padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent;
     white-space: nowrap; font-family: inherit;
   }
   nav button.active { color: var(--text); border-bottom-color: var(--green); font-weight: 600; }
   .tab { display: none; }
   .tab.active { display: block; }
 
-  /* ── Cards y componentes ── */
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
   .card {
     background: var(--panel); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 16px;
   }
   .card .lbl { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-  .card .big { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .card .big { font-size: 1.55rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
   .card .note { font-size: .8rem; color: var(--muted); margin-top: 4px; }
-  .green { color: var(--green); } .red { color: var(--red); } .yellow { color: var(--yellow); } .blue { color: var(--blue); }
+  .green { color: var(--green); } .red { color: var(--red); } .yellow { color: var(--yellow); }
+  .blue { color: var(--blue); } .purple { color: var(--purple); }
 
   h2 { font-size: 1.05rem; font-weight: 600; margin: 22px 0 10px; }
   h2:first-child { margin-top: 0; }
@@ -95,10 +93,13 @@
   button.btn.sec { background: var(--panel2); color: var(--text); border: 1px solid var(--border); }
   button.btn.small { padding: 4px 10px; font-size: .8rem; }
   button.btn.danger { background: none; color: var(--red); border: 1px solid var(--border); }
+  button.btn.mic { background: var(--purple); color: #1a1030; }
+  button.btn.mic.rec { background: var(--red); color: #fff; animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { filter: brightness(1.3); } }
 
   .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
   label.field { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: var(--muted); }
-  input, select {
+  input, select, textarea {
     background: var(--panel2); border: 1px solid var(--border); color: var(--text);
     border-radius: 8px; padding: 8px 10px; font-size: .92rem; font-family: inherit; width: 100%;
   }
@@ -110,9 +111,10 @@
   .tag { font-size: .7rem; padding: 2px 8px; border-radius: 99px; background: var(--panel2); border: 1px solid var(--border); color: var(--muted); }
   .tag.bcv { color: var(--yellow); }
   .tag.usdt { color: var(--green); }
+  .tag.due { color: var(--orange); }
   .debt-nums { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 8px; font-size: .85rem; color: var(--muted); }
   .debt-nums b { color: var(--text); font-variant-numeric: tabular-nums; }
-  .debt-actions { margin-top: 10px; display: flex; gap: 8px; }
+  .debt-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
 
   .muted { color: var(--muted); }
   .small { font-size: .8rem; }
@@ -121,10 +123,9 @@
   .calc { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
   .calc .result { font-size: 1.1rem; font-weight: 600; color: var(--green); padding-bottom: 8px; }
 
-  /* modal */
   dialog {
     background: var(--panel); color: var(--text); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 20px; max-width: 380px; width: 92%;
+    border-radius: var(--radius); padding: 20px; max-width: 400px; width: 92%;
     margin: auto;
   }
   dialog::backdrop { background: rgba(0,0,0,.6); }
@@ -137,9 +138,23 @@
     position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
     background: var(--green); color: #06281c; font-weight: 600; padding: 10px 20px;
     border-radius: 99px; font-size: .9rem; opacity: 0; transition: opacity .3s; pointer-events: none;
-    z-index: 99;
+    z-index: 99; max-width: 90%; text-align: center;
   }
   .toast.show { opacity: 1; }
+
+  .goal-card { margin-bottom: 12px; }
+  .stats-flex { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+  .stats-flex svg { flex-shrink: 0; }
+  .legend { flex: 1; min-width: 220px; }
+  .legend .li { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: .88rem; }
+  .legend .dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .legend .li b { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .legend .pct { color: var(--muted); font-size: .78rem; min-width: 44px; text-align: right; }
+
+  .capture-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  #ocrResult { margin-top: 10px; }
+  #ocrResult textarea { min-height: 100px; font-size: .8rem; }
+
   @media (max-width: 560px) {
     .rates .actions { margin-left: 0; align-items: flex-start; width: 100%; }
   }
@@ -149,11 +164,11 @@
 <div class="wrap">
   <header>
     <h1>💵 Mi Contabilidad</h1>
-    <div class="sub">Tus finanzas en dólares reales · datos guardados solo en esta PC</div>
+    <div class="sub">Tus finanzas en dólares reales · datos guardados solo en este dispositivo</div>
     <div class="rates">
       <div class="rate-chip"><span class="lbl">BCV oficial</span><span class="val yellow" id="rBcv">—</span></div>
-      <div class="rate-chip"><span class="lbl">Binance P2P</span><span class="val green" id="rBin">—</span></div>
-      <div class="rate-chip"><span class="lbl">Paralelo</span><span class="val" id="rPar">—</span></div>
+      <div class="rate-chip"><span class="lbl">Binance P2P</span><span class="val" id="rBinRaw">—</span></div>
+      <div class="rate-chip"><span class="lbl">Tu tasa real ▾<span id="rAdjPct"></span></span><span class="val green" id="rBin">—</span></div>
       <div class="rate-chip"><span class="lbl">Brecha</span><span class="val" id="rGap">—</span></div>
       <div class="rate-chip"><span class="lbl">$1 BCV te cuesta</span><span class="val green" id="rFactor">—</span></div>
       <div class="actions">
@@ -167,7 +182,8 @@
     <button data-tab="resumen" class="active" onclick="showTab('resumen')">Resumen</button>
     <button data-tab="deudas" onclick="showTab('deudas')">Deudas</button>
     <button data-tab="movs" onclick="showTab('movs')">Movimientos</button>
-    <button data-tab="boda" onclick="showTab('boda')">💍 Boda</button>
+    <button data-tab="stats" onclick="showTab('stats')">📊 Estadísticas</button>
+    <button data-tab="metas" onclick="showTab('metas')">🎯 Metas</button>
     <button data-tab="ajustes" onclick="showTab('ajustes')">Ajustes</button>
   </nav>
 
@@ -182,17 +198,17 @@
       <div class="card">
         <div class="lbl">Gastado este mes</div>
         <div class="big" id="sumSpent">—</div>
-        <div class="note" id="sumSpentNote"></div>
+        <div class="note">en USDT reales</div>
       </div>
       <div class="card">
         <div class="lbl">Disponible del mes</div>
         <div class="big green" id="sumFree">—</div>
-        <div class="note">de tu presupuesto de $<span id="sumIncome"></span></div>
+        <div class="note">de tu ingreso de $<span id="sumIncome"></span></div>
       </div>
       <div class="card">
-        <div class="lbl">Ahorro boda</div>
-        <div class="big blue" id="sumBoda">—</div>
-        <div class="note" id="sumBodaNote"></div>
+        <div class="lbl">Ahorrado en metas</div>
+        <div class="big blue" id="sumGoals">—</div>
+        <div class="note" id="sumGoalsNote"></div>
       </div>
     </div>
 
@@ -200,6 +216,14 @@
     <div class="table-scroll">
       <table id="budgetTable">
         <thead><tr><th>Categoría</th><th class="num">Plan</th><th class="num">Gastado (USDT real)</th><th class="num">Queda</th><th style="width:130px">Progreso</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>Próximos pagos</h2>
+    <div class="table-scroll">
+      <table id="upcomingTable">
+        <thead><tr><th>Fecha</th><th>Deuda</th><th class="num">Cuota</th><th class="num">Costo real USDT</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -221,21 +245,33 @@
       </div>
       <div class="small muted" id="calcDetail"></div>
     </div>
-    <div class="hint">💡 <b>Regla de oro:</b> no guardes bolívares. Vende USDT solo para lo que vas a pagar hoy o esta semana. Todo lo que esté a tasa BCV te sale ~<span id="hintPct">15</span>% más barato pagándolo con bolívares recién vendidos en Binance.</div>
+    <div class="hint">💡 <b>Regla de oro:</b> no guardes bolívares. Vende USDT solo para lo que vas a pagar hoy o esta semana. Lo que esté a tasa BCV te sale ~<span id="hintPct">15</span>% más barato pagándolo con bolívares recién vendidos.</div>
   </div>
 
   <!-- ════════ DEUDAS ════════ -->
   <div class="tab" id="tab-deudas">
     <div id="debtList"></div>
-    <button class="btn sec" onclick="openDebtModal()">+ Agregar deuda</button>
-    <div class="hint">Las <b>cooperativas</b> y la <b>comida</b> son pagos mensuales fijos: se controlan desde el presupuesto en Resumen. Aquí van deudas con saldo total que baja con cada abono (carro, amigo, Cashea…).</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn sec" onclick="openDebtModal()">+ Agregar deuda</button>
+      <button class="btn sec" onclick="openDebtModal('cashea')">+ Compra Cashea</button>
+    </div>
+    <div class="hint">🛍️ <b>Cashea:</b> usa el botón "Compra Cashea" — registras el total de la compra y la inicial que pagaste, y la app crea las 3 cuotas quincenales automáticamente (a tasa BCV, que es como cobra Cashea).</div>
   </div>
 
   <!-- ════════ MOVIMIENTOS ════════ -->
   <div class="tab" id="tab-movs">
     <h2>Registrar movimiento</h2>
     <div class="card">
-      <div class="form-grid">
+      <div class="capture-btns">
+        <button class="btn mic" id="micBtn" onclick="toggleVoice()">🎤 Dictar por voz</button>
+        <button class="btn sec" onclick="document.getElementById('ocrFile').click()">📷 Foto de factura / captura</button>
+        <input type="file" id="ocrFile" accept="image/*" capture="environment" style="display:none" onchange="ocrImage(this)">
+      </div>
+      <div id="ocrResult" style="display:none">
+        <div class="small muted" style="margin-bottom:4px">Texto detectado (revisa y ajusta el monto abajo):</div>
+        <textarea id="ocrText" readonly></textarea>
+      </div>
+      <div class="form-grid" style="margin-top:12px">
         <label class="field">Fecha<input type="date" id="txFecha"></label>
         <label class="field">Descripción<input type="text" id="txDesc" placeholder="Mercado semanal"></label>
         <label class="field">Categoría<select id="txCat"></select></label>
@@ -264,27 +300,44 @@
     </div>
   </div>
 
-  <!-- ════════ BODA ════════ -->
-  <div class="tab" id="tab-boda">
-    <div class="card" style="margin-bottom:14px">
-      <div class="lbl">Meta de la boda</div>
-      <div class="big blue"><span id="bodaSaved">0</span> <span class="muted" style="font-size:1rem">/ $<span id="bodaTarget">7000</span></span></div>
-      <div class="bar"><div id="bodaBar" style="width:0%;background:var(--blue)"></div></div>
-      <div class="note" id="bodaProj" style="margin-top:8px"></div>
+  <!-- ════════ ESTADÍSTICAS ════════ -->
+  <div class="tab" id="tab-stats">
+    <h2 style="display:flex;justify-content:space-between;align-items:center">¿En qué se va el dinero?
+      <select id="statMonth" style="width:auto" onchange="renderStats()"></select>
+    </h2>
+    <div class="card">
+      <div class="stats-flex">
+        <svg id="donut" width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="Gastos por categoría"></svg>
+        <div class="legend" id="statLegend"></div>
+      </div>
     </div>
-    <button class="btn" onclick="openAporte()">+ Registrar aporte</button>
-    <div class="hint">💡 Guarda los aportes de la boda en <b>USDT</b>, nunca en bolívares. Si un mes viene apretado, aporta menos pero <b>nunca cero</b> — el hábito vale más que el monto.</div>
-    <h2>Aportes registrados</h2>
+    <h2>Evolución</h2>
     <div class="table-scroll">
-      <table id="bodaTable">
-        <thead><tr><th>Fecha</th><th>Descripción</th><th class="num">Monto USDT</th><th></th></tr></thead>
+      <table id="statMonths">
+        <thead><tr><th>Mes</th><th class="num">Gastado (USDT)</th><th class="num">Ingresos reg.</th><th class="num">Ahorrado en metas</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </div>
 
+  <!-- ════════ METAS ════════ -->
+  <div class="tab" id="tab-metas">
+    <div id="goalList"></div>
+    <button class="btn sec" onclick="openGoalModal()">+ Nueva meta</button>
+    <div class="hint">💡 Guarda tus metas en <b>USDT</b>, nunca en bolívares. Si un mes viene apretado, aporta menos pero <b>nunca cero</b> — el hábito vale más que el monto.</div>
+  </div>
+
   <!-- ════════ AJUSTES ════════ -->
   <div class="tab" id="tab-ajustes">
+    <h2>Tasa Binance real</h2>
+    <div class="card">
+      <p class="small muted" style="margin-bottom:10px">El precio publicado en Binance P2P es para montos grandes. Cuando vendes poco (~$10) te pagan un poco menos. Este ajuste baja la tasa ese porcentaje para que los cálculos usen lo que <b>de verdad</b> recibes.</p>
+      <div class="form-grid">
+        <label class="field">Ajuste (% por debajo del P2P)<input type="number" id="cfgAjuste" step="0.1" min="0" max="10"></label>
+      </div>
+      <button class="btn sec" onclick="saveAjuste()">Guardar ajuste</button>
+    </div>
+
     <h2>Tasas manuales <span class="muted small">(para días sin internet)</span></h2>
     <div class="card">
       <div class="form-grid">
@@ -315,18 +368,18 @@
       <button class="btn sec" onclick="addPlanCat()">+ Agregar categoría</button>
     </div>
 
-    <h2>Meta de la boda</h2>
+    <h2>Lector de facturas (OCR)</h2>
     <div class="card">
+      <p class="small muted" style="margin-bottom:10px">Para que la app lea fotos de facturas y capturas de pago necesitas una clave gratuita de <b>OCR.space</b> (25.000 lecturas al mes gratis). Pídela en <b>ocr.space/ocrapi/freekey</b> con tu correo y pégala aquí. Se guarda solo en este dispositivo.</p>
       <div class="form-grid">
-        <label class="field">Meta total (USDT)<input type="number" id="cfgBodaTarget" step="any"></label>
-        <label class="field">Fecha objetivo<input type="month" id="cfgBodaFecha"></label>
+        <label class="field">API key de OCR.space<input type="text" id="cfgOcrKey" placeholder="K812..."></label>
       </div>
-      <button class="btn sec" onclick="saveBodaCfg()">Guardar meta</button>
+      <button class="btn sec" onclick="saveOcrKey()">Guardar clave</button>
     </div>
 
     <h2>Respaldo de datos</h2>
     <div class="card">
-      <p class="small muted" style="margin-bottom:10px">Tus datos viven en este navegador. Exporta un respaldo cada semana y guárdalo en esta misma carpeta (o en tu Drive) por si limpias el navegador.</p>
+      <p class="small muted" style="margin-bottom:10px">Tus datos viven en este navegador y no se comparten entre dispositivos. Exporta un respaldo cada semana, y úsalo para pasar tus datos del teléfono a la PC o al revés.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn" onclick="exportData()">⬇ Exportar respaldo</button>
         <button class="btn sec" onclick="document.getElementById('importFile').click()">⬆ Importar respaldo</button>
@@ -340,12 +393,26 @@
 <dialog id="debtModal">
   <h3 id="debtModalTitle">Agregar deuda</h3>
   <div class="row"><label class="field">Nombre<input type="text" id="dmNombre"></label></div>
-  <div class="row"><label class="field">Saldo pendiente<input type="number" id="dmSaldo" step="any"></label></div>
-  <div class="row"><label class="field">Moneda de la deuda<select id="dmMoneda">
-    <option value="USDT">USDT / dólar real</option>
-    <option value="USD_BCV">Dólares tasa BCV (Cashea, tiendas)</option>
-  </select></label></div>
-  <div class="row"><label class="field">Abono mensual planeado (opcional)<input type="number" id="dmCuota" step="any"></label></div>
+  <div class="row" id="dmCasheaRows" style="display:none">
+    <label class="field" style="margin-bottom:10px">Total de la compra ($ BCV)<input type="number" id="dmTotal" step="any" oninput="dmCasheaCalc()"></label>
+    <label class="field">Inicial pagada ($ BCV)<input type="number" id="dmInicial" step="any" oninput="dmCasheaCalc()"></label>
+    <div class="small muted" id="dmCasheaInfo" style="margin-top:6px"></div>
+  </div>
+  <div id="dmNormalRows">
+    <div class="row"><label class="field">Saldo pendiente<input type="number" id="dmSaldo" step="any"></label></div>
+    <div class="row"><label class="field">Moneda de la deuda<select id="dmMoneda">
+      <option value="USDT">USDT / dólar real</option>
+      <option value="USD_BCV">Dólares tasa BCV (Cashea, tiendas)</option>
+    </select></label></div>
+    <div class="row"><label class="field">Abono planeado (opcional)<input type="number" id="dmCuota" step="any"></label></div>
+    <div class="row"><label class="field">Frecuencia de pago<select id="dmFrec">
+      <option value="30">Mensual</option>
+      <option value="14">Quincenal (cada 15 días)</option>
+      <option value="7">Semanal</option>
+      <option value="0">Sin fecha fija</option>
+    </select></label></div>
+  </div>
+  <div class="row"><label class="field">Próximo pago<input type="date" id="dmProx"></label></div>
   <div class="btns">
     <button class="btn sec" onclick="debtModal.close()">Cancelar</button>
     <button class="btn" onclick="saveDebt()">Guardar</button>
@@ -364,9 +431,21 @@
   </div>
 </dialog>
 
-<!-- Modal aporte boda -->
+<!-- Modal meta -->
+<dialog id="goalModal">
+  <h3>Nueva meta 🎯</h3>
+  <div class="row"><label class="field">Nombre (ej: Boda, Viaje, Fondo de emergencia)<input type="text" id="gmNombre"></label></div>
+  <div class="row"><label class="field">Meta total (USDT)<input type="number" id="gmTarget" step="any"></label></div>
+  <div class="row"><label class="field">Fecha objetivo<input type="month" id="gmFecha"></label></div>
+  <div class="btns">
+    <button class="btn sec" onclick="goalModal.close()">Cancelar</button>
+    <button class="btn" onclick="saveGoal()">Guardar</button>
+  </div>
+</dialog>
+
+<!-- Modal aporte -->
 <dialog id="aporteModal">
-  <h3>Aporte a la boda 💍</h3>
+  <h3>Aporte a <span id="apGoalName"></span></h3>
   <div class="row"><label class="field">Fecha<input type="date" id="apFecha"></label></div>
   <div class="row"><label class="field">Monto (USDT)<input type="number" id="apMonto" step="any"></label></div>
   <div class="row"><label class="field">Descripción (opcional)<input type="text" id="apDesc" placeholder="Aporte del mes"></label></div>
@@ -380,49 +459,59 @@
 
 <script>
 'use strict';
-const LS_KEY = 'contabilidad_v1';
+const LS_KEY = 'contabilidad_v2';
 const fmt = (n, dec = 2) => (n == null || isNaN(n)) ? '—' : n.toLocaleString('es-VE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const monthKey = d => (d || todayStr()).slice(0, 7);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const addDays = (dateStr, days) => {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+};
 
 // ── Estado ──────────────────────────────────────────────
 const DEFAULT_DATA = {
-  rates: { bcv: 777.42, binance: 919.75, paralelo: 898.14, updatedAt: null, source: 'inicial' },
-  income: 1600,
+  rates: { bcv: 777.42, binance: 921.50, paralelo: null, ajuste: 0.4, updatedAt: null, source: 'inicial' },
+  income: 0,
   plan: [
-    { id: 'comida',  nombre: 'Comida',        monto: 250, moneda: 'USD_BCV' },
-    { id: 'coop',    nombre: 'Cooperativas',  monto: 270, moneda: 'USD_BCV' },
-    { id: 'carro',   nombre: 'Carro (abono)', monto: 200, moneda: 'USDT' },
-    { id: 'boda',    nombre: 'Boda (ahorro)', monto: 583, moneda: 'USDT' },
-    { id: 'personal',nombre: 'Personal',      monto: 150, moneda: 'USDT' },
-    { id: 'otros',   nombre: 'Otros',         monto: 0,   moneda: 'USDT' }
+    { id: 'comida',     nombre: 'Comida',      monto: 0, moneda: 'USD_BCV' },
+    { id: 'transporte', nombre: 'Transporte',  monto: 0, moneda: 'USDT' },
+    { id: 'servicios',  nombre: 'Servicios',   monto: 0, moneda: 'USDT' },
+    { id: 'deudas',     nombre: 'Deudas',      monto: 0, moneda: 'USDT' },
+    { id: 'ahorro',     nombre: 'Ahorro/Metas',monto: 0, moneda: 'USDT' },
+    { id: 'personal',   nombre: 'Personal',    monto: 0, moneda: 'USDT' },
+    { id: 'otros',      nombre: 'Otros',       monto: 0, moneda: 'USDT' }
   ],
-  debts: [
-    { id: 'd_carro', nombre: 'Carro',  moneda: 'USDT', saldoInicial: 1600, saldo: 1600, cuota: 200, cat: 'carro' },
-    { id: 'd_amigo', nombre: 'Amigo',  moneda: 'USDT', saldoInicial: 110,  saldo: 110,  cuota: 110, cat: 'otros' }
-  ],
-  boda: { target: 7000, fecha: '2027-08' },
-  txs: [] // {id, fecha, desc, cat, monto, moneda, tipo, costoUSDT, debtId?, boda?}
+  debts: [],
+  goals: [],
+  txs: [],
+  ocrKey: ''
 };
 
 let D = load();
 function load() {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) { console.error(e); }
+    if (raw) {
+      const d = JSON.parse(raw);
+      if (d.rates.ajuste == null) d.rates.ajuste = 0.4;
+      if (!d.goals) d.goals = [];
+      return d;
+    }
+  } catch (e) { console.warn(e); }
   return JSON.parse(JSON.stringify(DEFAULT_DATA));
 }
 function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(D)); } catch (e) { console.warn('No se pudo guardar', e); } }
 
 // ── Conversión ──────────────────────────────────────────
-// Costo real en USDT de un monto expresado en otra "moneda"
+// Tasa Binance efectiva: el P2P publicado menos el ajuste por venta pequeña
+function effBinance() { return D.rates.binance * (1 - (D.rates.ajuste || 0) / 100); }
 function costUSDT(monto, moneda) {
-  const { bcv, binance } = D.rates;
+  const bcv = D.rates.bcv, bin = effBinance();
   if (moneda === 'USDT') return monto;
-  if (moneda === 'USD_BCV') return monto * bcv / binance;
-  if (moneda === 'BS') return monto / binance;
+  if (moneda === 'USD_BCV') return monto * bcv / bin;
+  if (moneda === 'BS') return monto / bin;
   return monto;
 }
 const curLabel = { USDT: '$ USDT', USD_BCV: '$ BCV', BS: 'Bs' };
@@ -440,13 +529,13 @@ async function fetchRates(manual) {
     const paralelo = dolarapi.find(d => d.fuente === 'paralelo' || d.nombre?.toLowerCase().includes('paralelo'));
     if (oficial?.promedio) D.rates.bcv = oficial.promedio;
     if (paralelo?.promedio) D.rates.paralelo = paralelo.promedio;
-    if (criptoya?.bid) D.rates.binance = criptoya.bid; // lo que recibes al vender USDT
+    if (criptoya?.bid) D.rates.binance = criptoya.bid;
     D.rates.updatedAt = new Date().toISOString();
     D.rates.source = 'api';
     save(); renderAll();
     if (manual) toast('Tasas actualizadas ✓');
   } catch (e) {
-    console.error(e);
+    console.warn(e);
     stamp.textContent = 'sin conexión — usando última tasa guardada';
     if (manual) toast('No hay internet: usa tasas manuales en Ajustes', true);
     renderRates();
@@ -460,26 +549,35 @@ function saveManualRates() {
   D.rates.updatedAt = new Date().toISOString(); D.rates.source = 'manual';
   save(); renderAll(); toast('Tasas manuales guardadas ✓');
 }
+function saveAjuste() {
+  const a = parseFloat(document.getElementById('cfgAjuste').value);
+  if (isNaN(a) || a < 0) return toast('Porcentaje inválido', true);
+  D.rates.ajuste = a;
+  save(); renderAll(); toast('Ajuste guardado ✓');
+}
 function renderRates() {
-  const { bcv, binance, paralelo, updatedAt, source } = D.rates;
+  const { bcv, binance, updatedAt, source, ajuste } = D.rates;
+  const eff = effBinance();
   document.getElementById('rBcv').textContent = fmt(bcv);
-  document.getElementById('rBin').textContent = fmt(binance);
-  document.getElementById('rPar').textContent = paralelo ? fmt(paralelo) : '—';
-  const gap = (binance / bcv - 1) * 100;
-  document.getElementById('rGap').textContent = fmt(gap, 1) + '%';
-  document.getElementById('rFactor').textContent = '$' + fmt(bcv / binance, 3);
-  document.getElementById('hintPct').textContent = fmt(100 - (bcv / binance) * 100, 0);
+  document.getElementById('rBinRaw').textContent = fmt(binance);
+  document.getElementById('rBin').textContent = fmt(eff);
+  document.getElementById('rAdjPct').textContent = ` (-${fmt(ajuste, 1)}%)`;
+  document.getElementById('rGap').textContent = fmt((eff / bcv - 1) * 100, 1) + '%';
+  document.getElementById('rFactor').textContent = '$' + fmt(bcv / eff, 3);
+  document.getElementById('hintPct').textContent = fmt(100 - (bcv / eff) * 100, 0);
   document.getElementById('rStamp').textContent = updatedAt
     ? `${source === 'manual' ? 'manual' : 'API'} · ${new Date(updatedAt).toLocaleString('es-VE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}`
     : 'tasas iniciales — pulsa actualizar';
   document.getElementById('manBcv').value = bcv;
   document.getElementById('manBin').value = binance;
+  document.getElementById('cfgAjuste').value = ajuste;
 }
 
 // ── Tabs ────────────────────────────────────────────────
 function showTab(name) {
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+  if (name === 'stats') renderStats();
 }
 
 // ── Movimientos ─────────────────────────────────────────
@@ -494,6 +592,7 @@ function addTx() {
   D.txs.push({ id: uid(), fecha, desc, cat, monto, moneda, tipo, costoUSDT: costUSDT(monto, moneda) });
   save(); renderAll();
   document.getElementById('txMonto').value = ''; document.getElementById('txDesc').value = '';
+  document.getElementById('ocrResult').style.display = 'none';
   toast('Movimiento guardado ✓');
 }
 function delTx(id) {
@@ -508,24 +607,157 @@ function delTx(id) {
   save(); renderAll();
 }
 
+// ── Voz ─────────────────────────────────────────────────
+let recognition = null, recording = false;
+function toggleVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return toast('Tu navegador no soporta dictado — usa Chrome', true);
+  const btn = document.getElementById('micBtn');
+  if (recording) { recognition.stop(); return; }
+  recognition = new SR();
+  recognition.lang = 'es-VE';
+  recognition.interimResults = false;
+  recognition.onstart = () => { recording = true; btn.classList.add('rec'); btn.textContent = '⏹ Escuchando… toca para parar'; };
+  recognition.onend = () => { recording = false; btn.classList.remove('rec'); btn.textContent = '🎤 Dictar por voz'; };
+  recognition.onerror = e => { toast('No se pudo escuchar: ' + e.error, true); };
+  recognition.onresult = e => {
+    const text = e.results[0][0].transcript;
+    parseVoice(text);
+  };
+  recognition.start();
+}
+function parseVoice(text) {
+  const t = text.toLowerCase();
+  // monto: primer número (acepta "25", "25,50", "veinticinco" no)
+  const numMatch = t.replace(/\./g, '').match(/(\d+(?:,\d+)?)/);
+  const monto = numMatch ? parseFloat(numMatch[1].replace(',', '.')) : null;
+  // moneda
+  let moneda = 'USDT';
+  if (/bol[ií]var|\bbs\b/.test(t)) moneda = 'BS';
+  else if (/bcv/.test(t)) moneda = 'USD_BCV';
+  // categoría por palabras clave
+  const kw = {
+    comida: /comida|mercado|almuerzo|desayuno|cena|pollo|carne|verdura|panader|bodega|supermerc/,
+    transporte: /taxi|moto|pasaje|gasolina|bus|camionet|transporte/,
+    servicios: /luz|agua|internet|tel[eé]fono|recarga|servicio|corte de pelo|peluquer/,
+    deudas: /deuda|cuota|cashea|cooperativa|abono/,
+    personal: /ropa|zapato|cine|salida|regalo|personal/,
+  };
+  let cat = 'otros';
+  for (const [k, re] of Object.entries(kw)) if (re.test(t) && D.plan.some(p => p.id === k)) { cat = k; break; }
+  const tipo = /cobr[eé]|ingreso|me pagaron|recib[íi]/.test(t) ? 'ingreso' : 'gasto';
+  document.getElementById('txDesc').value = text;
+  if (monto) document.getElementById('txMonto').value = monto;
+  document.getElementById('txMoneda').value = moneda;
+  document.getElementById('txTipo').value = tipo;
+  const sel = document.getElementById('txCat');
+  if ([...sel.options].some(o => o.value === cat)) sel.value = cat;
+  toast(monto ? `Entendí: ${fmt(monto)} ${curLabel[moneda]} — revisa y guarda` : 'Te escuché, pero no capté el monto — escríbelo', !monto);
+}
+
+// ── OCR (foto de factura / captura de pago) ─────────────
+async function ocrImage(input) {
+  const file = input.files[0];
+  input.value = '';
+  if (!file) return;
+  if (!D.ocrKey) {
+    showTab('ajustes');
+    return toast('Primero configura tu clave gratuita de OCR.space en Ajustes', true);
+  }
+  toast('Leyendo imagen… ⏳');
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('language', 'spa');
+    fd.append('OCREngine', '2');
+    fd.append('scale', 'true');
+    const res = await fetch('https://api.ocr.space/parse/image', {
+      method: 'POST', headers: { apikey: D.ocrKey }, body: fd
+    });
+    const json = await res.json();
+    if (json.IsErroredOnProcessing) throw new Error(json.ErrorMessage?.[0] || 'error OCR');
+    const text = (json.ParsedResults || []).map(p => p.ParsedText).join('\n').trim();
+    if (!text) return toast('No se detectó texto en la imagen', true);
+    document.getElementById('ocrResult').style.display = 'block';
+    document.getElementById('ocrText').value = text;
+    parseReceipt(text);
+  } catch (e) {
+    console.warn(e);
+    toast('No se pudo leer la imagen: ' + e.message, true);
+  }
+}
+function parseReceipt(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  // buscar línea con "total" (evitando "subtotal" si hay total)
+  const grabNum = s => {
+    const m = s.replace(/(\d)\.(\d{3})/g, '$1$2').match(/(\d+(?:[.,]\d{1,2})?)/g);
+    return m ? Math.max(...m.map(x => parseFloat(x.replace(',', '.')))) : null;
+  };
+  let monto = null;
+  const totalLine = lines.find(l => /total/i.test(l) && !/subtotal/i.test(l)) || lines.find(l => /total/i.test(l));
+  if (totalLine) monto = grabNum(totalLine);
+  if (!monto) {
+    const nums = lines.map(grabNum).filter(n => n && n < 10000000);
+    if (nums.length) monto = Math.max(...nums);
+  }
+  // moneda: si aparece Bs o los montos son grandes, probablemente bolívares
+  const esBs = /\bbs\b|bol[ií]var|ves\b/i.test(text) || (monto && monto > 3000);
+  if (monto) document.getElementById('txMonto').value = monto;
+  document.getElementById('txMoneda').value = esBs ? 'BS' : 'USD_BCV';
+  if (!document.getElementById('txDesc').value) document.getElementById('txDesc').value = lines[0]?.slice(0, 40) || 'Factura';
+  toast(monto ? `Detecté ${fmt(monto)} ${esBs ? 'Bs' : '$'} — revisa y guarda` : 'Leí el texto pero no encontré el total — revísalo', !monto);
+}
+function saveOcrKey() {
+  D.ocrKey = document.getElementById('cfgOcrKey').value.trim();
+  save(); toast(D.ocrKey ? 'Clave OCR guardada ✓' : 'Clave borrada');
+}
+
 // ── Deudas ──────────────────────────────────────────────
 const debtModal = document.getElementById('debtModal');
 const payModal = document.getElementById('payModal');
-let payingDebtId = null;
+let payingDebtId = null, debtMode = 'normal';
 
-function openDebtModal() {
-  document.getElementById('dmNombre').value = '';
-  document.getElementById('dmSaldo').value = '';
-  document.getElementById('dmCuota').value = '';
+function openDebtModal(mode) {
+  debtMode = mode === 'cashea' ? 'cashea' : 'normal';
+  document.getElementById('debtModalTitle').textContent = debtMode === 'cashea' ? 'Compra Cashea 🛍️' : 'Agregar deuda';
+  document.getElementById('dmCasheaRows').style.display = debtMode === 'cashea' ? 'block' : 'none';
+  document.getElementById('dmNormalRows').style.display = debtMode === 'cashea' ? 'none' : 'block';
+  ['dmNombre','dmSaldo','dmCuota','dmTotal','dmInicial'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('dmProx').value = debtMode === 'cashea' ? addDays(todayStr(), 14) : '';
+  document.getElementById('dmCasheaInfo').textContent = '';
   debtModal.showModal();
+}
+function dmCasheaCalc() {
+  const total = parseFloat(document.getElementById('dmTotal').value) || 0;
+  const inicial = parseFloat(document.getElementById('dmInicial').value) || 0;
+  const info = document.getElementById('dmCasheaInfo');
+  if (total > inicial && total > 0) {
+    const cuota = (total - inicial) / 3;
+    info.textContent = `Quedan $${fmt(total - inicial)} BCV en 3 cuotas quincenales de $${fmt(cuota)} c/u.`;
+  } else info.textContent = '';
 }
 function saveDebt() {
   const nombre = document.getElementById('dmNombre').value.trim();
-  const saldo = parseFloat(document.getElementById('dmSaldo').value);
-  const moneda = document.getElementById('dmMoneda').value;
-  const cuota = parseFloat(document.getElementById('dmCuota').value) || 0;
-  if (!nombre || !saldo) return toast('Completa nombre y saldo', true);
-  D.debts.push({ id: uid(), nombre, moneda, saldoInicial: saldo, saldo, cuota, cat: 'otros' });
+  const prox = document.getElementById('dmProx').value || null;
+  if (!nombre) return toast('Ponle nombre', true);
+  if (debtMode === 'cashea') {
+    const total = parseFloat(document.getElementById('dmTotal').value);
+    const inicial = parseFloat(document.getElementById('dmInicial').value) || 0;
+    if (!total || total <= inicial) return toast('Revisa el total y la inicial', true);
+    const saldo = total - inicial;
+    D.debts.push({
+      id: uid(), nombre: nombre + ' (Cashea)', moneda: 'USD_BCV',
+      saldoInicial: saldo, saldo, cuota: saldo / 3, frec: 14,
+      proxima: prox || addDays(todayStr(), 14), cat: 'deudas'
+    });
+  } else {
+    const saldo = parseFloat(document.getElementById('dmSaldo').value);
+    const moneda = document.getElementById('dmMoneda').value;
+    const cuota = parseFloat(document.getElementById('dmCuota').value) || 0;
+    const frec = parseInt(document.getElementById('dmFrec').value) || 0;
+    if (!saldo) return toast('Completa el saldo', true);
+    D.debts.push({ id: uid(), nombre, moneda, saldoInicial: saldo, saldo, cuota, frec, proxima: prox, cat: 'deudas' });
+  }
   save(); renderAll(); debtModal.close(); toast('Deuda agregada ✓');
 }
 function openPay(id) {
@@ -535,7 +767,7 @@ function openPay(id) {
   document.getElementById('pmName').textContent = d.nombre;
   document.getElementById('pmCur').textContent = curLabel[d.moneda];
   document.getElementById('pmFecha').value = todayStr();
-  document.getElementById('pmMonto').value = d.cuota || '';
+  document.getElementById('pmMonto').value = d.cuota ? Math.min(d.cuota, d.saldo).toFixed(2) : '';
   pmPreview();
   payModal.showModal();
 }
@@ -546,7 +778,7 @@ function pmPreview() {
   if (!d || !monto) { el.textContent = ''; return; }
   const costo = costUSDT(monto, d.moneda);
   el.textContent = d.moneda === 'USD_BCV'
-    ? `Costo real: ${fmt(costo)} USDT (necesitas vender esto en Binance) · en Bs: ${fmt(monto * D.rates.bcv, 0)} Bs`
+    ? `Costo real: ${fmt(costo)} USDT · en Bs: ${fmt(monto * D.rates.bcv, 0)} Bs`
     : `Costo real: ${fmt(costo)} USDT`;
 }
 function savePay() {
@@ -555,8 +787,9 @@ function savePay() {
   const fecha = document.getElementById('pmFecha').value || todayStr();
   if (!d || !monto || monto <= 0) return toast('Monto inválido', true);
   d.saldo = Math.max(0, d.saldo - monto);
+  if (d.proxima && d.frec) d.proxima = d.saldo > 0 ? addDays(d.proxima, d.frec) : null;
   D.txs.push({
-    id: uid(), fecha, desc: 'Abono ' + d.nombre, cat: d.cat || 'otros',
+    id: uid(), fecha, desc: 'Abono ' + d.nombre, cat: 'deudas',
     monto, moneda: d.moneda, tipo: 'gasto', costoUSDT: costUSDT(monto, d.moneda), debtId: d.id
   });
   save(); renderAll(); payModal.close();
@@ -570,28 +803,54 @@ function delDebt(id) {
   save(); renderAll();
 }
 
-// ── Boda ────────────────────────────────────────────────
+// ── Metas ───────────────────────────────────────────────
+const goalModal = document.getElementById('goalModal');
 const aporteModal = document.getElementById('aporteModal');
-function openAporte() {
+let aporteGoalId = null;
+const GOAL_COLORS = ['var(--blue)', 'var(--purple)', 'var(--teal)', 'var(--pink)', 'var(--orange)'];
+
+function openGoalModal() {
+  document.getElementById('gmNombre').value = '';
+  document.getElementById('gmTarget').value = '';
+  document.getElementById('gmFecha').value = '';
+  goalModal.showModal();
+}
+function saveGoal() {
+  const nombre = document.getElementById('gmNombre').value.trim();
+  const target = parseFloat(document.getElementById('gmTarget').value);
+  const fecha = document.getElementById('gmFecha').value;
+  if (!nombre || !target) return toast('Completa nombre y meta', true);
+  D.goals.push({ id: uid(), nombre, target, fecha: fecha || null });
+  save(); renderAll(); goalModal.close(); toast('Meta creada ✓ 🎯');
+}
+function delGoal(id) {
+  const g = D.goals.find(x => x.id === id);
+  if (!g) return;
+  if (!confirm(`¿Eliminar la meta "${g.nombre}"? Los aportes quedan en el historial.`)) return;
+  D.goals = D.goals.filter(x => x.id !== id);
+  save(); renderAll();
+}
+function openAporte(goalId) {
+  const g = D.goals.find(x => x.id === goalId);
+  if (!g) return;
+  aporteGoalId = goalId;
+  document.getElementById('apGoalName').textContent = g.nombre;
   document.getElementById('apFecha').value = todayStr();
   document.getElementById('apMonto').value = '';
   document.getElementById('apDesc').value = '';
   aporteModal.showModal();
 }
 function saveAporte() {
+  const g = D.goals.find(x => x.id === aporteGoalId);
   const monto = parseFloat(document.getElementById('apMonto').value);
   const fecha = document.getElementById('apFecha').value || todayStr();
-  const desc = document.getElementById('apDesc').value.trim() || 'Aporte boda';
-  if (!monto || monto <= 0) return toast('Monto inválido', true);
-  D.txs.push({ id: uid(), fecha, desc, cat: 'boda', monto, moneda: 'USDT', tipo: 'gasto', costoUSDT: monto, boda: true });
-  save(); renderAll(); aporteModal.close(); toast('Aporte guardado ✓ 💍');
+  const desc = document.getElementById('apDesc').value.trim() || ('Aporte ' + (g?.nombre || 'meta'));
+  if (!g || !monto || monto <= 0) return toast('Monto inválido', true);
+  D.txs.push({ id: uid(), fecha, desc, cat: 'ahorro', monto, moneda: 'USDT', tipo: 'gasto', costoUSDT: monto, goalId: g.id });
+  save(); renderAll(); aporteModal.close(); toast('Aporte guardado ✓');
 }
-function saveBodaCfg() {
-  const t = parseFloat(document.getElementById('cfgBodaTarget').value);
-  const f = document.getElementById('cfgBodaFecha').value;
-  if (t) D.boda.target = t;
-  if (f) D.boda.fecha = f;
-  save(); renderAll(); toast('Meta actualizada ✓');
+function goalSaved(id) {
+  return D.txs.filter(t => t.goalId === id).reduce((s, t) => s + t.monto, 0);
 }
 
 // ── Presupuesto (Ajustes) ───────────────────────────────
@@ -637,7 +896,10 @@ function importData(input) {
       const data = JSON.parse(e.target.result);
       if (!data.txs || !data.debts) throw new Error('formato');
       if (!confirm('Esto reemplaza TODOS los datos actuales con el respaldo. ¿Continuar?')) return;
-      D = data; save(); renderAll(); toast('Respaldo importado ✓');
+      D = data;
+      if (D.rates.ajuste == null) D.rates.ajuste = 0.4;
+      if (!D.goals) D.goals = [];
+      save(); renderAll(); toast('Respaldo importado ✓');
     } catch { toast('Archivo de respaldo inválido', true); }
   };
   reader.readAsText(file);
@@ -650,37 +912,32 @@ function renderAll() {
   renderResumen();
   renderDebts();
   renderTxs();
-  renderBoda();
+  renderGoals();
   renderAjustes();
   renderCalc();
+  renderStats();
 }
-
-function monthTxs(mes) {
-  return D.txs.filter(t => monthKey(t.fecha) === mes);
-}
+function monthTxs(mes) { return D.txs.filter(t => monthKey(t.fecha) === mes); }
 
 function renderResumen() {
   const mes = monthKey();
   document.getElementById('mesActualLbl').textContent = '· ' + new Date().toLocaleDateString('es-VE', { month: 'long', year: 'numeric' });
 
-  // Deuda total en USDT reales
   const totalDebt = D.debts.reduce((s, d) => s + costUSDT(d.saldo, d.moneda), 0);
   document.getElementById('sumDebt').textContent = '$' + fmt(totalDebt);
   document.getElementById('sumDebtNote').textContent = D.debts.filter(d => d.saldo > 0).length + ' deudas activas · en USDT reales';
 
   const txs = monthTxs(mes);
   const gastado = txs.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.costoUSDT, 0);
-  const ingresos = txs.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.costoUSDT, 0);
   document.getElementById('sumSpent').textContent = '$' + fmt(gastado);
-  document.getElementById('sumSpentNote').textContent = ingresos > 0 ? `ingresos registrados: $${fmt(ingresos)}` : 'incluye abonos y aportes';
   document.getElementById('sumFree').textContent = '$' + fmt(D.income - gastado);
   document.getElementById('sumIncome').textContent = fmt(D.income, 0);
 
-  const saved = bodaSaved();
-  document.getElementById('sumBoda').textContent = '$' + fmt(saved, 0);
-  document.getElementById('sumBodaNote').textContent = fmt(saved / D.boda.target * 100, 1) + '% de $' + fmt(D.boda.target, 0);
+  const savedAll = D.goals.reduce((s, g) => s + goalSaved(g.id), 0);
+  document.getElementById('sumGoals').textContent = '$' + fmt(savedAll, 0);
+  document.getElementById('sumGoalsNote').textContent = D.goals.length + ' metas activas';
 
-  // Tabla presupuesto
+  // Presupuesto
   const tb = document.querySelector('#budgetTable tbody');
   tb.innerHTML = '';
   let totalPlan = 0;
@@ -695,39 +952,55 @@ function renderResumen() {
       <td class="num muted">$${fmt(planUSDT)}${p.moneda === 'USD_BCV' ? `<div class="small">($${fmt(p.monto, 0)} BCV)</div>` : ''}</td>
       <td class="num">$${fmt(spent)}</td>
       <td class="num ${left < 0 ? 'red' : 'green'}">$${fmt(left)}</td>
-      <td><div class="bar ${pct > 90 ? 'warn' : ''}"><div style="width:${pct}%${pct > 100 ? ';background:var(--red)' : ''}"></div></div></td>`;
+      <td><div class="bar ${pct > 90 ? 'warn' : ''}"><div style="width:${pct}%${pct >= 100 ? ';background:var(--red)' : ''}"></div></div></td>`;
     tb.appendChild(tr);
   }
-  const trTotal = document.createElement('tr');
   const totalSpent = txs.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.costoUSDT, 0);
+  const trTotal = document.createElement('tr');
   trTotal.innerHTML = `<td><b>Total</b></td><td class="num"><b>$${fmt(totalPlan)}</b></td>
     <td class="num"><b>$${fmt(totalSpent)}</b></td>
     <td class="num"><b class="${D.income - totalSpent < 0 ? 'red' : 'green'}">$${fmt(D.income - totalSpent)}</b> <span class="muted small">del ingreso</span></td><td></td>`;
   tb.appendChild(trTotal);
+
+  // Próximos pagos
+  const up = document.querySelector('#upcomingTable tbody');
+  up.innerHTML = '';
+  const upcoming = D.debts.filter(d => d.saldo > 0 && d.proxima).sort((a, b) => a.proxima.localeCompare(b.proxima));
+  if (!upcoming.length) up.innerHTML = '<tr><td colspan="4" class="muted">Sin pagos programados</td></tr>';
+  for (const d of upcoming) {
+    const cuota = Math.min(d.cuota || d.saldo, d.saldo);
+    const late = d.proxima < todayStr();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="${late ? 'red' : ''}">${d.proxima}${late ? ' ⚠' : ''}</td><td>${d.nombre}</td>
+      <td class="num">$${fmt(cuota)} <span class="muted small">${curLabel[d.moneda]}</span></td>
+      <td class="num green">$${fmt(costUSDT(cuota, d.moneda))}</td>`;
+    up.appendChild(tr);
+  }
 }
 
 function renderDebts() {
   const list = document.getElementById('debtList');
   list.innerHTML = '';
-  if (!D.debts.length) list.innerHTML = '<p class="muted" style="margin-bottom:12px">No tienes deudas registradas 🎉</p>';
+  if (!D.debts.length) list.innerHTML = '<p class="muted" style="margin-bottom:12px">No tienes deudas registradas 🎉 Agrega la primera abajo.</p>';
   for (const d of D.debts) {
     const paid = d.saldoInicial - d.saldo;
     const pct = d.saldoInicial > 0 ? paid / d.saldoInicial * 100 : 0;
     const realCost = costUSDT(d.saldo, d.moneda);
-    const months = d.cuota > 0 ? Math.ceil(d.saldo / d.cuota) : null;
+    const cuotasLeft = d.cuota > 0 ? Math.ceil(d.saldo / d.cuota) : null;
     const card = document.createElement('div');
     card.className = 'card debt-card';
     card.innerHTML = `
       <div class="debt-head">
-        <span class="name">${d.nombre} <span class="tag ${d.moneda === 'USDT' ? 'usdt' : 'bcv'}">${curLabel[d.moneda]}</span></span>
+        <span class="name">${d.nombre} <span class="tag ${d.moneda === 'USDT' ? 'usdt' : 'bcv'}">${curLabel[d.moneda]}</span>
+        ${d.proxima && d.saldo > 0 ? `<span class="tag due">próx: ${d.proxima}</span>` : ''}</span>
         <span class="${d.saldo === 0 ? 'green' : ''}" style="font-weight:600">${d.saldo === 0 ? '✓ Saldada' : 'Debe: $' + fmt(d.saldo)}</span>
       </div>
       <div class="bar"><div style="width:${pct}%"></div></div>
       <div class="debt-nums">
         <span>Pagado: <b>$${fmt(paid)}</b> de $${fmt(d.saldoInicial)}</span>
         ${d.moneda === 'USD_BCV' ? `<span>Costo real restante: <b class="green">$${fmt(realCost)} USDT</b></span>` : ''}
-        ${d.cuota ? `<span>Abono plan: <b>$${fmt(d.cuota, 0)}/mes</b></span>` : ''}
-        ${months && d.saldo > 0 ? `<span>Te quedan <b>${months} ${months === 1 ? 'mes' : 'meses'}</b></span>` : ''}
+        ${d.cuota ? `<span>Cuota: <b>$${fmt(d.cuota)}</b>${d.frec ? (d.frec === 14 ? ' quincenal' : d.frec === 7 ? ' semanal' : ' mensual') : ''}</span>` : ''}
+        ${cuotasLeft && d.saldo > 0 ? `<span>Faltan <b>${cuotasLeft} ${cuotasLeft === 1 ? 'cuota' : 'cuotas'}</b></span>` : ''}
       </div>
       <div class="debt-actions">
         ${d.saldo > 0 ? `<button class="btn small" onclick="openPay('${d.id}')">Registrar abono</button>` : ''}
@@ -738,7 +1011,6 @@ function renderDebts() {
 }
 
 function renderTxs() {
-  // selector de mes
   const sel = document.getElementById('movMonth');
   const months = [...new Set(D.txs.map(t => monthKey(t.fecha)))].sort().reverse();
   const current = monthKey();
@@ -752,7 +1024,7 @@ function renderTxs() {
   const txs = monthTxs(sel.value).sort((a, b) => b.fecha.localeCompare(a.fecha));
   if (!txs.length) tb.innerHTML = '<tr><td colspan="6" class="muted">Sin movimientos este mes</td></tr>';
   for (const t of txs) {
-    const catName = D.plan.find(p => p.id === t.cat)?.nombre || (t.cat === 'boda' ? 'Boda' : t.cat);
+    const catName = D.plan.find(p => p.id === t.cat)?.nombre || t.cat;
     const tr = document.createElement('tr');
     tr.innerHTML = `<td class="muted">${t.fecha.slice(8)}/${t.fecha.slice(5, 7)}</td>
       <td>${t.desc}</td><td class="muted">${catName}</td>
@@ -763,41 +1035,120 @@ function renderTxs() {
   }
 }
 
-function bodaSaved() {
-  return D.txs.filter(t => t.boda).reduce((s, t) => s + t.monto, 0);
-}
-function renderBoda() {
-  const saved = bodaSaved();
-  const { target, fecha } = D.boda;
-  document.getElementById('bodaSaved').textContent = '$' + fmt(saved, 0);
-  document.getElementById('bodaTarget').textContent = fmt(target, 0);
-  document.getElementById('bodaBar').style.width = Math.min(100, saved / target * 100) + '%';
-  const [y, m] = fecha.split('-').map(Number);
-  const now = new Date();
-  const monthsLeft = Math.max(0, (y - now.getFullYear()) * 12 + (m - 1 - now.getMonth()));
-  const needed = monthsLeft > 0 ? (target - saved) / monthsLeft : target - saved;
-  document.getElementById('bodaProj').innerHTML = monthsLeft > 0
-    ? `Faltan <b>${monthsLeft} meses</b> para ${new Date(y, m - 1).toLocaleDateString('es-VE', { month: 'long', year: 'numeric' })} → necesitas ahorrar <b class="blue">$${fmt(Math.max(0, needed), 0)}/mes</b>`
-    : `¡La fecha llegó! ${saved >= target ? '🎉 Meta cumplida' : 'Faltan $' + fmt(target - saved, 0)}`;
+// ── Estadísticas ────────────────────────────────────────
+const PALETTE = ['#2ecc8f', '#4dabf7', '#ffd166', '#ff6b6b', '#b197fc', '#ffa94d', '#3bc9db', '#f783ac', '#94d82d', '#868e96'];
+function renderStats() {
+  const sel = document.getElementById('statMonth');
+  const months = [...new Set(D.txs.map(t => monthKey(t.fecha)))].sort().reverse();
+  const current = monthKey();
+  if (!months.includes(current)) months.unshift(current);
+  const prev = sel.value;
+  sel.innerHTML = months.map(m => `<option value="${m}">${new Date(m + '-02').toLocaleDateString('es-VE', { month: 'long', year: 'numeric' })}</option>`).join('');
+  sel.value = months.includes(prev) ? prev : current;
 
-  const tb = document.querySelector('#bodaTable tbody');
+  const txs = monthTxs(sel.value).filter(t => t.tipo === 'gasto');
+  const byCat = {};
+  for (const t of txs) byCat[t.cat] = (byCat[t.cat] || 0) + t.costoUSDT;
+  const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  const total = entries.reduce((s, [, v]) => s + v, 0);
+
+  const svg = document.getElementById('donut');
+  const legend = document.getElementById('statLegend');
+  svg.innerHTML = ''; legend.innerHTML = '';
+  if (!total) {
+    svg.innerHTML = '<circle cx="100" cy="100" r="70" fill="none" stroke="#1e242e" stroke-width="34"/><text x="100" y="105" text-anchor="middle" fill="#8b96a5" font-size="13">Sin gastos</text>';
+    return;
+  }
+  // donut con stroke-dasharray
+  const R = 70, C = 2 * Math.PI * R;
+  let offset = 0;
+  entries.forEach(([cat, val], i) => {
+    const frac = val / total;
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', 100); c.setAttribute('cy', 100); c.setAttribute('r', R);
+    c.setAttribute('fill', 'none');
+    c.setAttribute('stroke', PALETTE[i % PALETTE.length]);
+    c.setAttribute('stroke-width', 34);
+    c.setAttribute('stroke-dasharray', `${frac * C} ${C}`);
+    c.setAttribute('stroke-dashoffset', -offset * C);
+    c.setAttribute('transform', 'rotate(-90 100 100)');
+    svg.appendChild(c);
+    offset += frac;
+  });
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label.setAttribute('x', 100); label.setAttribute('y', 96); label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('fill', '#e8ecf1'); label.setAttribute('font-size', 20); label.setAttribute('font-weight', 700);
+  label.textContent = '$' + fmt(total, 0);
+  svg.appendChild(label);
+  const label2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label2.setAttribute('x', 100); label2.setAttribute('y', 114); label2.setAttribute('text-anchor', 'middle');
+  label2.setAttribute('fill', '#8b96a5'); label2.setAttribute('font-size', 11);
+  label2.textContent = 'total USDT';
+  svg.appendChild(label2);
+
+  entries.forEach(([cat, val], i) => {
+    const name = D.plan.find(p => p.id === cat)?.nombre || cat;
+    const li = document.createElement('div');
+    li.className = 'li';
+    li.innerHTML = `<span class="dot" style="background:${PALETTE[i % PALETTE.length]}"></span>
+      <span>${name}</span><b>$${fmt(val)}</b><span class="pct">${fmt(val / total * 100, 1)}%</span>`;
+    legend.appendChild(li);
+  });
+
+  // tabla evolución
+  const tb = document.querySelector('#statMonths tbody');
   tb.innerHTML = '';
-  const aportes = D.txs.filter(t => t.boda).sort((a, b) => b.fecha.localeCompare(a.fecha));
-  if (!aportes.length) tb.innerHTML = '<tr><td colspan="4" class="muted">Aún no hay aportes — ¡registra el primero!</td></tr>';
-  for (const t of aportes) {
+  for (const m of months.slice(0, 12)) {
+    const mt = monthTxs(m);
+    const g = mt.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.costoUSDT, 0);
+    const ing = mt.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.costoUSDT, 0);
+    const ah = mt.filter(t => t.goalId).reduce((s, t) => s + t.monto, 0);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="muted">${t.fecha}</td><td>${t.desc}</td>
-      <td class="num blue">$${fmt(t.monto)}</td>
-      <td><button class="btn small danger" onclick="delTx('${t.id}')">✕</button></td>`;
+    tr.innerHTML = `<td>${new Date(m + '-02').toLocaleDateString('es-VE', { month: 'long', year: 'numeric' })}</td>
+      <td class="num">$${fmt(g)}</td><td class="num green">$${fmt(ing)}</td><td class="num blue">$${fmt(ah)}</td>`;
     tb.appendChild(tr);
   }
+}
+
+// ── Metas render ────────────────────────────────────────
+function renderGoals() {
+  const list = document.getElementById('goalList');
+  list.innerHTML = '';
+  if (!D.goals.length) list.innerHTML = '<p class="muted" style="margin-bottom:12px">Crea tu primera meta: boda, viaje, fondo de emergencia, un teléfono nuevo…</p>';
+  D.goals.forEach((g, i) => {
+    const saved = goalSaved(g.id);
+    const pct = Math.min(100, saved / g.target * 100);
+    const color = GOAL_COLORS[i % GOAL_COLORS.length];
+    let proj = '';
+    if (g.fecha) {
+      const [y, m] = g.fecha.split('-').map(Number);
+      const now = new Date();
+      const monthsLeft = Math.max(0, (y - now.getFullYear()) * 12 + (m - 1 - now.getMonth()));
+      proj = monthsLeft > 0
+        ? `Faltan <b>${monthsLeft} meses</b> → ahorra <b style="color:${color}">$${fmt(Math.max(0, (g.target - saved) / monthsLeft), 0)}/mes</b>`
+        : (saved >= g.target ? '🎉 ¡Meta cumplida!' : `Fecha cumplida — faltan $${fmt(g.target - saved, 0)}`);
+    }
+    const card = document.createElement('div');
+    card.className = 'card goal-card';
+    card.innerHTML = `
+      <div class="debt-head">
+        <span class="name">🎯 ${g.nombre}</span>
+        <span style="font-weight:600;color:${color}">$${fmt(saved, 0)} <span class="muted" style="font-weight:400">/ $${fmt(g.target, 0)} · ${fmt(pct, 0)}%</span></span>
+      </div>
+      <div class="bar"><div style="width:${pct}%;background:${color}"></div></div>
+      ${proj ? `<div class="small muted" style="margin-top:8px">${proj}</div>` : ''}
+      <div class="debt-actions">
+        <button class="btn small" onclick="openAporte('${g.id}')">+ Aporte</button>
+        <button class="btn small danger" onclick="delGoal('${g.id}')">Eliminar</button>
+      </div>`;
+    list.appendChild(card);
+  });
 }
 
 function renderAjustes() {
   document.getElementById('cfgIncome').value = D.income;
   document.getElementById('cfgIncome').onchange = e => updIncome(e.target.value);
-  document.getElementById('cfgBodaTarget').value = D.boda.target;
-  document.getElementById('cfgBodaFecha').value = D.boda.fecha;
+  document.getElementById('cfgOcrKey').value = D.ocrKey || '';
 
   const tb = document.querySelector('#planTable tbody');
   tb.innerHTML = '';
@@ -813,7 +1164,6 @@ function renderAjustes() {
     tb.appendChild(tr);
   }
 
-  // categorías en el form de movimientos
   const sel = document.getElementById('txCat');
   const prev = sel.value;
   sel.innerHTML = D.plan.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
@@ -829,9 +1179,9 @@ function renderCalc() {
   const costo = costUSDT(monto, moneda);
   out.textContent = `= ${fmt(costo)} USDT tuyos`;
   if (moneda === 'USD_BCV') {
-    detail.textContent = `Son ${fmt(monto * D.rates.bcv, 0)} Bs a tasa BCV. Vendiendo USDT en Binance a ${fmt(D.rates.binance)} solo necesitas ${fmt(costo)} USDT — te ahorras $${fmt(monto - costo)} por la brecha.`;
+    detail.textContent = `Son ${fmt(monto * D.rates.bcv, 0)} Bs a tasa BCV. Vendiendo USDT a tu tasa real de ${fmt(effBinance())} solo necesitas ${fmt(costo)} USDT — te ahorras $${fmt(monto - costo)} por la brecha.`;
   } else if (moneda === 'BS') {
-    detail.textContent = `Vendiendo USDT a ${fmt(D.rates.binance)} Bs.`;
+    detail.textContent = `Vendiendo USDT a tu tasa real de ${fmt(effBinance())} Bs.`;
   } else detail.textContent = '';
 }
 
@@ -843,7 +1193,7 @@ function toast(msg, warn) {
   el.style.background = warn ? 'var(--yellow)' : 'var(--green)';
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
 // ── Init ────────────────────────────────────────────────

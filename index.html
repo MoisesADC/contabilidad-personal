@@ -870,7 +870,8 @@ function delPlanCat(id) {
 function updPlan(id, field, val) {
   const p = D.plan.find(x => x.id === id);
   if (!p) return;
-  p[field] = field === 'monto' ? (parseFloat(val) || 0) : val;
+  if (field === 'nombre' && !val.trim()) { renderAll(); return toast('El nombre no puede quedar vacío', true); }
+  p[field] = field === 'monto' ? (parseFloat(val) || 0) : (field === 'nombre' ? val.trim() : val);
   save(); renderAll();
 }
 function updIncome(val) {
@@ -1154,7 +1155,7 @@ function renderAjustes() {
   tb.innerHTML = '';
   for (const p of D.plan) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${p.nombre}</td>
+    tr.innerHTML = `<td><input type="text" value="${p.nombre.replace(/"/g, '&quot;')}" style="max-width:150px" onchange="updPlan('${p.id}','nombre',this.value)"></td>
       <td class="num"><input type="number" step="any" value="${p.monto}" style="max-width:110px;text-align:right" onchange="updPlan('${p.id}','monto',this.value)"></td>
       <td><select style="max-width:120px" onchange="updPlan('${p.id}','moneda',this.value)">
         <option value="USDT" ${p.moneda === 'USDT' ? 'selected' : ''}>USDT</option>
@@ -1166,8 +1167,19 @@ function renderAjustes() {
 
   const sel = document.getElementById('txCat');
   const prev = sel.value;
-  sel.innerHTML = D.plan.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
-  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+  sel.innerHTML = D.plan.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('')
+    + '<option value="__new">➕ Nueva categoría…</option>';
+  if ([...sel.options].some(o => o.value === prev) && prev !== '__new') sel.value = prev;
+  sel.onchange = () => {
+    if (sel.value !== '__new') return;
+    const nombre = (window.prompt('Nombre de la nueva categoría:') || '').trim();
+    if (!nombre) { sel.value = D.plan[0]?.id || ''; return; }
+    const nueva = { id: uid(), nombre, monto: 0, moneda: 'USDT' };
+    D.plan.push(nueva);
+    save(); renderAll();
+    document.getElementById('txCat').value = nueva.id;
+    toast(`Categoría "${nombre}" creada ✓ — ponle presupuesto en Ajustes si quieres`);
+  };
 }
 
 function renderCalc() {

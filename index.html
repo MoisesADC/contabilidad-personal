@@ -302,8 +302,10 @@
     <div class="card">
       <div class="capture-btns">
         <button class="btn mic" id="micBtn" onclick="toggleVoice()">🎤 Dictar por voz</button>
-        <button class="btn sec" onclick="document.getElementById('ocrFile').click()">📷 Foto de factura / captura</button>
+        <button class="btn sec" onclick="document.getElementById('ocrFile').click()">📷 Tomar foto de factura</button>
+        <button class="btn sec" onclick="document.getElementById('ocrGallery').click()">🖼️ Subir captura / imagen</button>
         <input type="file" id="ocrFile" accept="image/*" capture="environment" style="display:none" onchange="ocrImage(this)">
+        <input type="file" id="ocrGallery" accept="image/*" style="display:none" onchange="ocrImage(this)">
       </div>
       <div id="ocrResult" style="display:none">
         <div class="small muted" style="margin-bottom:4px">Texto detectado (revisa y ajusta el monto abajo):</div>

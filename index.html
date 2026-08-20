@@ -485,8 +485,8 @@
 <script>
 'use strict';
 // ── Nube (Supabase) — si están vacíos, la app funciona 100% local ──
-const SUPA_URL = '';
-const SUPA_KEY = '';
+const SUPA_URL = 'https://mohbtgletsfjuadyfwac.supabase.co';
+const SUPA_KEY = 'sb_publishable_NWSH4Gb2fcyoq27evXUPtQ_gN28LdMj';
 const LS_KEY = 'contabilidad_v2';
 const fmt = (n, dec = 2) => (n == null || isNaN(n)) ? '—' : n.toLocaleString('es-VE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 const todayStr = () => new Date().toISOString().slice(0, 10);

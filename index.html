@@ -785,7 +785,16 @@ function toggleVoice() {
   recognition.interimResults = false;
   recognition.onstart = () => { recording = true; btn.classList.add('rec'); btn.textContent = '⏹ Escuchando… toca para parar'; };
   recognition.onend = () => { recording = false; btn.classList.remove('rec'); btn.textContent = '🎤 Dictar por voz'; };
-  recognition.onerror = e => { toast('No se pudo escuchar: ' + e.error, true); };
+  recognition.onerror = e => {
+    const msgs = {
+      'not-allowed': 'Permiso de micrófono denegado — actívalo en el candado/ajustes del navegador',
+      'service-not-allowed': 'El navegador bloqueó el servicio de voz — usa Chrome',
+      'no-speech': 'No escuché nada — intenta de nuevo hablando más cerca',
+      'network': 'El servicio de voz necesita internet — revisa tu conexión',
+      'audio-capture': 'No se encontró micrófono en este dispositivo'
+    };
+    toast(msgs[e.error] || 'No se pudo escuchar: ' + e.error, true);
+  };
   recognition.onresult = e => {
     const text = e.results[0][0].transcript;
     parseVoice(text);
@@ -849,7 +858,7 @@ async function aiAnalyze(file) {
   const mime = file.type || 'image/jpeg';
   let text;
   if (D.ai.provider === 'gemini') {
-    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(D.ai.key), {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' + encodeURIComponent(D.ai.key), {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts: [{ inline_data: { mime_type: mime, data: b64 } }, { text: aiPrompt() }] }] })
     });

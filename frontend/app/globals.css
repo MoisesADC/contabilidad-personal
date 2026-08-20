@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/* Sistema de diseño "Mi Contabilidad" — ver design-system/mi-contabilidad/MASTER.md
+   Azul confianza + verde ganancia sobre fondo oscuro, densidad dashboard. */
+@theme {
+  --color-bg: #0f172a;
+  --color-panel: #131e38;
+  --color-panel2: #1a2748;
+  --color-borde: rgba(255, 255, 255, 0.08);
+  --color-texto: #f1f5f9;
+  --color-sutil: #8fa1bd;
+  --color-primario: #3b82f6;
+  --color-primario-fuerte: #1e40af;
+  --color-verde: #10b981;
+  --color-verde-oscuro: #059669;
+  --color-ambar: #f59e0b;
+  --color-rojo: #ef4444;
+  --color-violeta: #8b5cf6;
+  --font-sans: var(--font-plex), system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-texto);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Foco visible para navegación por teclado (WCAG) */
+:focus-visible {
+  outline: 3px solid var(--color-primario);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Contabilidad</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #171c24;
+    --panel2: #1e242e;
+    --border: #2a3240;
+    --text: #e8ecf1;
+    --muted: #8b96a5;
+    --green: #2ecc8f;
+    --green-dim: #1b5e46;
+    --red: #ff6b6b;
+    --yellow: #ffd166;
+    --blue: #4dabf7;
+    --purple: #b197fc;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    padding-bottom: 60px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 16px; }
+
+  /* ── Header y tasas ── */
+  header { padding: 20px 16px 8px; }
+  header h1 { font-size: 1.35rem; font-weight: 600; }
+  header .sub { color: var(--muted); font-size: .85rem; }
+  .rates {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px; margin-top: 14px;
+  }
+  .rate-chip { display: flex; flex-direction: column; min-width: 105px; }
+  .rate-chip .lbl { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .rate-chip .val { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rate-chip .val.green { color: var(--green); }
+  .rate-chip .val.yellow { color: var(--yellow); }
+  .rates .actions { margin-left: auto; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+  .rates .stamp { font-size: .72rem; color: var(--muted); }
+
+  /* ── Tabs ── */
+  nav {
+    display: flex; gap: 4px; margin: 16px 0 18px; overflow-x: auto;
+    border-bottom: 1px solid var(--border); padding-bottom: 0;
+  }
+  nav button {
+    background: none; border: none; color: var(--muted); font-size: .95rem;
+    padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent;
+    white-space: nowrap; font-family: inherit;
+  }
+  nav button.active { color: var(--text); border-bottom-color: var(--green); font-weight: 600; }
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* ── Cards y componentes ── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+  .card .lbl { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .card .big { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .card .note { font-size: .8rem; color: var(--muted); margin-top: 4px; }
+  .green { color: var(--green); } .red { color: var(--red); } .yellow { color: var(--yellow); } .blue { color: var(--blue); }
+
+  h2 { font-size: 1.05rem; font-weight: 600; margin: 22px 0 10px; }
+  h2:first-child { margin-top: 0; }
+
+  .bar { background: var(--panel2); border-radius: 99px; height: 10px; overflow: hidden; margin-top: 8px; }
+  .bar > div { height: 100%; border-radius: 99px; background: var(--green); transition: width .4s; }
+  .bar.warn > div { background: var(--yellow); }
+
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  .num { text-align: right; }
+  th.num { text-align: right; }
+
+  button.btn {
+    background: var(--green); color: #06281c; border: none; border-radius: 8px;
+    padding: 8px 16px; font-size: .9rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  button.btn:hover { filter: brightness(1.1); }
+  button.btn.sec { background: var(--panel2); color: var(--text); border: 1px solid var(--border); }
+  button.btn.small { padding: 4px 10px; font-size: .8rem; }
+  button.btn.danger { background: none; color: var(--red); border: 1px solid var(--border); }
+
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  label.field { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: var(--muted); }
+  input, select {
+    background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 8px 10px; font-size: .92rem; font-family: inherit; width: 100%;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--green); }
+
+  .debt-card { margin-bottom: 12px; }
+  .debt-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px; }
+  .debt-head .name { font-weight: 600; font-size: 1rem; }
+  .tag { font-size: .7rem; padding: 2px 8px; border-radius: 99px; background: var(--panel2); border: 1px solid var(--border); color: var(--muted); }
+  .tag.bcv { color: var(--yellow); }
+  .tag.usdt { color: var(--green); }
+  .debt-nums { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 8px; font-size: .85rem; color: var(--muted); }
+  .debt-nums b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .debt-actions { margin-top: 10px; display: flex; gap: 8px; }
+
+  .muted { color: var(--muted); }
+  .small { font-size: .8rem; }
+  .hint { font-size: .82rem; color: var(--muted); background: var(--panel2); border-left: 3px solid var(--green); padding: 10px 12px; border-radius: 0 8px 8px 0; margin: 12px 0; }
+
+  .calc { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .calc .result { font-size: 1.1rem; font-weight: 600; color: var(--green); padding-bottom: 8px; }
+
+  /* modal */
+  dialog {
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; max-width: 380px; width: 92%;
+    margin: auto;
+  }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+  dialog h3 { margin-bottom: 12px; font-size: 1rem; }
+  dialog .row { margin-bottom: 10px; }
+  dialog .btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+
+  .table-scroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); }
+  .toast {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: #06281c; font-weight: 600; padding: 10px 20px;
+    border-radius: 99px; font-size: .9rem; opacity: 0; transition: opacity .3s; pointer-events: none;
+    z-index: 99;
+  }
+  .toast.show { opacity: 1; }
+  @media (max-width: 560px) {
+    .rates .actions { margin-left: 0; align-items: flex-start; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>💵 Mi Contabilidad</h1>
+    <div class="sub">Tus finanzas en dólares reales · datos guardados solo en esta PC</div>
+    <div class="rates">
+      <div class="rate-chip"><span class="lbl">BCV oficial</span><span class="val yellow" id="rBcv">—</span></div>
+      <div class="rate-chip"><span class="lbl">Binance P2P</span><span class="val green" id="rBin">—</span></div>
+      <div class="rate-chip"><span class="lbl">Paralelo</span><span class="val" id="rPar">—</span></div>
+      <div class="rate-chip"><span class="lbl">Brecha</span><span class="val" id="rGap">—</span></div>
+      <div class="rate-chip"><span class="lbl">$1 BCV te cuesta</span><span class="val green" id="rFactor">—</span></div>
+      <div class="actions">
+        <button class="btn small" onclick="fetchRates(true)">↻ Actualizar tasas</button>
+        <span class="stamp" id="rStamp">sin datos</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <button data-tab="resumen" class="active" onclick="showTab('resumen')">Resumen</button>
+    <button data-tab="deudas" onclick="showTab('deudas')">Deudas</button>
+    <button data-tab="movs" onclick="showTab('movs')">Movimientos</button>
+    <button data-tab="boda" onclick="showTab('boda')">💍 Boda</button>
+    <button data-tab="ajustes" onclick="showTab('ajustes')">Ajustes</button>
+  </nav>
+
+  <!-- ════════ RESUMEN ════════ -->
+  <div class="tab active" id="tab-resumen">
+    <div class="cards">
+      <div class="card">
+        <div class="lbl">Deuda total restante</div>
+        <div class="big red" id="sumDebt">—</div>
+        <div class="note" id="sumDebtNote"></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Gastado este mes</div>
+        <div class="big" id="sumSpent">—</div>
+        <div class="note" id="sumSpentNote"></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Disponible del mes</div>
+        <div class="big green" id="sumFree">—</div>
+        <div class="note">de tu presupuesto de $<span id="sumIncome"></span></div>
+      </div>
+      <div class="card">
+        <div class="lbl">Ahorro boda</div>
+        <div class="big blue" id="sumBoda">—</div>
+        <div class="note" id="sumBodaNote"></div>
+      </div>
+    </div>
+
+    <h2>Presupuesto del mes <span class="muted small" id="mesActualLbl"></span></h2>
+    <div class="table-scroll">
+      <table id="budgetTable">
+        <thead><tr><th>Categoría</th><th class="num">Plan</th><th class="num">Gastado (USDT real)</th><th class="num">Queda</th><th style="width:130px">Progreso</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <h2>Calculadora: ¿cuánto me cuesta de verdad?</h2>
+    <div class="card">
+      <div class="calc">
+        <label class="field" style="max-width:140px">Monto
+          <input type="number" id="calcMonto" placeholder="50" step="any">
+        </label>
+        <label class="field" style="max-width:170px">Está expresado en
+          <select id="calcMoneda">
+            <option value="USD_BCV">Dólares (tasa BCV)</option>
+            <option value="BS">Bolívares</option>
+            <option value="USDT">USDT / dólar real</option>
+          </select>
+        </label>
+        <div class="result" id="calcOut">= …</div>
+      </div>
+      <div class="small muted" id="calcDetail"></div>
+    </div>
+    <div class="hint">💡 <b>Regla de oro:</b> no guardes bolívares. Vende USDT solo para lo que vas a pagar hoy o esta semana. Todo lo que esté a tasa BCV te sale ~<span id="hintPct">15</span>% más barato pagándolo con bolívares recién vendidos en Binance.</div>
+  </div>
+
+  <!-- ════════ DEUDAS ════════ -->
+  <div class="tab" id="tab-deudas">
+    <div id="debtList"></div>
+    <button class="btn sec" onclick="openDebtModal()">+ Agregar deuda</button>
+    <div class="hint">Las <b>cooperativas</b> y la <b>comida</b> son pagos mensuales fijos: se controlan desde el presupuesto en Resumen. Aquí van deudas con saldo total que baja con cada abono (carro, amigo, Cashea…).</div>
+  </div>
+
+  <!-- ════════ MOVIMIENTOS ════════ -->
+  <div class="tab" id="tab-movs">
+    <h2>Registrar movimiento</h2>
+    <div class="card">
+      <div class="form-grid">
+        <label class="field">Fecha<input type="date" id="txFecha"></label>
+        <label class="field">Descripción<input type="text" id="txDesc" placeholder="Mercado semanal"></label>
+        <label class="field">Categoría<select id="txCat"></select></label>
+        <label class="field">Monto<input type="number" id="txMonto" step="any" placeholder="0.00"></label>
+        <label class="field">Moneda<select id="txMoneda">
+          <option value="USDT">USDT / dólar real</option>
+          <option value="USD_BCV">Dólares tasa BCV</option>
+          <option value="BS">Bolívares</option>
+        </select></label>
+        <label class="field">Tipo<select id="txTipo">
+          <option value="gasto">Gasto</option>
+          <option value="ingreso">Ingreso</option>
+        </select></label>
+      </div>
+      <button class="btn" onclick="addTx()">Guardar movimiento</button>
+    </div>
+
+    <h2 style="display:flex;justify-content:space-between;align-items:center">Historial
+      <select id="movMonth" style="width:auto" onchange="renderAll()"></select>
+    </h2>
+    <div class="table-scroll">
+      <table id="txTable">
+        <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th class="num">Monto</th><th class="num">Costo real USDT</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════ BODA ════════ -->
+  <div class="tab" id="tab-boda">
+    <div class="card" style="margin-bottom:14px">
+      <div class="lbl">Meta de la boda</div>
+      <div class="big blue"><span id="bodaSaved">0</span> <span class="muted" style="font-size:1rem">/ $<span id="bodaTarget">7000</span></span></div>
+      <div class="bar"><div id="bodaBar" style="width:0%;background:var(--blue)"></div></div>
+      <div class="note" id="bodaProj" style="margin-top:8px"></div>
+    </div>
+    <button class="btn" onclick="openAporte()">+ Registrar aporte</button>
+    <div class="hint">💡 Guarda los aportes de la boda en <b>USDT</b>, nunca en bolívares. Si un mes viene apretado, aporta menos pero <b>nunca cero</b> — el hábito vale más que el monto.</div>
+    <h2>Aportes registrados</h2>
+    <div class="table-scroll">
+      <table id="bodaTable">
+        <thead><tr><th>Fecha</th><th>Descripción</th><th class="num">Monto USDT</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════════ AJUSTES ════════ -->
+  <div class="tab" id="tab-ajustes">
+    <h2>Tasas manuales <span class="muted small">(para días sin internet)</span></h2>
+    <div class="card">
+      <div class="form-grid">
+        <label class="field">Tasa BCV (Bs/$)<input type="number" id="manBcv" step="any"></label>
+        <label class="field">Tasa Binance (Bs/$)<input type="number" id="manBin" step="any"></label>
+      </div>
+      <button class="btn sec" onclick="saveManualRates()">Usar estas tasas</button>
+    </div>
+
+    <h2>Presupuesto mensual</h2>
+    <div class="card">
+      <div class="form-grid">
+        <label class="field">Ingreso mensual (USDT)<input type="number" id="cfgIncome" step="any"></label>
+      </div>
+      <div class="table-scroll" style="margin-bottom:10px">
+        <table id="planTable">
+          <thead><tr><th>Categoría</th><th class="num">Plan mensual</th><th>Moneda</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="form-grid">
+        <label class="field">Nueva categoría<input type="text" id="newCatName" placeholder="Nombre"></label>
+        <label class="field">Plan<input type="number" id="newCatAmt" step="any" placeholder="0"></label>
+        <label class="field">Moneda<select id="newCatCur">
+          <option value="USDT">USDT</option><option value="USD_BCV">USD BCV</option>
+        </select></label>
+      </div>
+      <button class="btn sec" onclick="addPlanCat()">+ Agregar categoría</button>
+    </div>
+
+    <h2>Meta de la boda</h2>
+    <div class="card">
+      <div class="form-grid">
+        <label class="field">Meta total (USDT)<input type="number" id="cfgBodaTarget" step="any"></label>
+        <label class="field">Fecha objetivo<input type="month" id="cfgBodaFecha"></label>
+      </div>
+      <button class="btn sec" onclick="saveBodaCfg()">Guardar meta</button>
+    </div>
+
+    <h2>Respaldo de datos</h2>
+    <div class="card">
+      <p class="small muted" style="margin-bottom:10px">Tus datos viven en este navegador. Exporta un respaldo cada semana y guárdalo en esta misma carpeta (o en tu Drive) por si limpias el navegador.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="exportData()">⬇ Exportar respaldo</button>
+        <button class="btn sec" onclick="document.getElementById('importFile').click()">⬆ Importar respaldo</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal deuda -->
+<dialog id="debtModal">
+  <h3 id="debtModalTitle">Agregar deuda</h3>
+  <div class="row"><label class="field">Nombre<input type="text" id="dmNombre"></label></div>
+  <div class="row"><label class="field">Saldo pendiente<input type="number" id="dmSaldo" step="any"></label></div>
+  <div class="row"><label class="field">Moneda de la deuda<select id="dmMoneda">
+    <option value="USDT">USDT / dólar real</option>
+    <option value="USD_BCV">Dólares tasa BCV (Cashea, tiendas)</option>
+  </select></label></div>
+  <div class="row"><label class="field">Abono mensual planeado (opcional)<input type="number" id="dmCuota" step="any"></label></div>
+  <div class="btns">
+    <button class="btn sec" onclick="debtModal.close()">Cancelar</button>
+    <button class="btn" onclick="saveDebt()">Guardar</button>
+  </div>
+</dialog>
+
+<!-- Modal pago -->
+<dialog id="payModal">
+  <h3>Registrar abono — <span id="pmName"></span></h3>
+  <div class="row"><label class="field">Fecha<input type="date" id="pmFecha"></label></div>
+  <div class="row"><label class="field">Monto del abono (<span id="pmCur"></span>)<input type="number" id="pmMonto" step="any" oninput="pmPreview()"></label></div>
+  <div class="small muted" id="pmCosto"></div>
+  <div class="btns">
+    <button class="btn sec" onclick="payModal.close()">Cancelar</button>
+    <button class="btn" onclick="savePay()">Registrar</button>
+  </div>
+</dialog>
+
+<!-- Modal aporte boda -->
+<dialog id="aporteModal">
+  <h3>Aporte a la boda 💍</h3>
+  <div class="row"><label class="field">Fecha<input type="date" id="apFecha"></label></div>
+  <div class="row"><label class="field">Monto (USDT)<input type="number" id="apMonto" step="any"></label></div>
+  <div class="row"><label class="field">Descripción (opcional)<input type="text" id="apDesc" placeholder="Aporte del mes"></label></div>
+  <div class="btns">
+    <button class="btn sec" onclick="aporteModal.close()">Cancelar</button>
+    <button class="btn" onclick="saveAporte()">Guardar</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const LS_KEY = 'contabilidad_v1';
+const fmt = (n, dec = 2) => (n == null || isNaN(n)) ? '—' : n.toLocaleString('es-VE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+const todayStr = () => new Date().toISOString().slice(0, 10);
+const monthKey = d => (d || todayStr()).slice(0, 7);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+// ── Estado ──────────────────────────────────────────────
+const DEFAULT_DATA = {
+  rates: { bcv: 777.42, binance: 919.75, paralelo: 898.14, updatedAt: null, source: 'inicial' },
+  income: 1600,
+  plan: [
+    { id: 'comida',  nombre: 'Comida',        monto: 250, moneda: 'USD_BCV' },
+    { id: 'coop',    nombre: 'Cooperativas',  monto: 270, moneda: 'USD_BCV' },
+    { id: 'carro',   nombre: 'Carro (abono)', monto: 200, moneda: 'USDT' },
+    { id: 'boda',    nombre: 'Boda (ahorro)', monto: 583, moneda: 'USDT' },
+    { id: 'personal',nombre: 'Personal',      monto: 150, moneda: 'USDT' },
+    { id: 'otros',   nombre: 'Otros',         monto: 0,   moneda: 'USDT' }
+  ],
+  debts: [
+    { id: 'd_carro', nombre: 'Carro',  moneda: 'USDT', saldoInicial: 1600, saldo: 1600, cuota: 200, cat: 'carro' },
+    { id: 'd_amigo', nombre: 'Amigo',  moneda: 'USDT', saldoInicial: 110,  saldo: 110,  cuota: 110, cat: 'otros' }
+  ],
+  boda: { target: 7000, fecha: '2027-08' },
+  txs: [] // {id, fecha, desc, cat, monto, moneda, tipo, costoUSDT, debtId?, boda?}
+};
+
+let D = load();
+function load() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) { console.error(e); }
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(D)); } catch (e) { console.warn('No se pudo guardar', e); } }
+
+// ── Conversión ──────────────────────────────────────────
+// Costo real en USDT de un monto expresado en otra "moneda"
+function costUSDT(monto, moneda) {
+  const { bcv, binance } = D.rates;
+  if (moneda === 'USDT') return monto;
+  if (moneda === 'USD_BCV') return monto * bcv / binance;
+  if (moneda === 'BS') return monto / binance;
+  return monto;
+}
+const curLabel = { USDT: '$ USDT', USD_BCV: '$ BCV', BS: 'Bs' };
+
+// ── Tasas ───────────────────────────────────────────────
+async function fetchRates(manual) {
+  const stamp = document.getElementById('rStamp');
+  stamp.textContent = 'actualizando…';
+  try {
+    const [dolarapi, criptoya] = await Promise.all([
+      fetch('https://ve.dolarapi.com/v1/dolares').then(r => r.json()),
+      fetch('https://criptoya.com/api/binancep2p/USDT/VES/1').then(r => r.json())
+    ]);
+    const oficial = dolarapi.find(d => d.fuente === 'oficial' || d.nombre?.toLowerCase().includes('oficial'));
+    const paralelo = dolarapi.find(d => d.fuente === 'paralelo' || d.nombre?.toLowerCase().includes('paralelo'));
+    if (oficial?.promedio) D.rates.bcv = oficial.promedio;
+    if (paralelo?.promedio) D.rates.paralelo = paralelo.promedio;
+    if (criptoya?.bid) D.rates.binance = criptoya.bid; // lo que recibes al vender USDT
+    D.rates.updatedAt = new Date().toISOString();
+    D.rates.source = 'api';
+    save(); renderAll();
+    if (manual) toast('Tasas actualizadas ✓');
+  } catch (e) {
+    console.error(e);
+    stamp.textContent = 'sin conexión — usando última tasa guardada';
+    if (manual) toast('No hay internet: usa tasas manuales en Ajustes', true);
+    renderRates();
+  }
+}
+function saveManualRates() {
+  const bcv = parseFloat(document.getElementById('manBcv').value);
+  const bin = parseFloat(document.getElementById('manBin').value);
+  if (!bcv || !bin) return toast('Completa ambas tasas', true);
+  D.rates.bcv = bcv; D.rates.binance = bin;
+  D.rates.updatedAt = new Date().toISOString(); D.rates.source = 'manual';
+  save(); renderAll(); toast('Tasas manuales guardadas ✓');
+}
+function renderRates() {
+  const { bcv, binance, paralelo, updatedAt, source } = D.rates;
+  document.getElementById('rBcv').textContent = fmt(bcv);
+  document.getElementById('rBin').textContent = fmt(binance);
+  document.getElementById('rPar').textContent = paralelo ? fmt(paralelo) : '—';
+  const gap = (binance / bcv - 1) * 100;
+  document.getElementById('rGap').textContent = fmt(gap, 1) + '%';
+  document.getElementById('rFactor').textContent = '$' + fmt(bcv / binance, 3);
+  document.getElementById('hintPct').textContent = fmt(100 - (bcv / binance) * 100, 0);
+  document.getElementById('rStamp').textContent = updatedAt
+    ? `${source === 'manual' ? 'manual' : 'API'} · ${new Date(updatedAt).toLocaleString('es-VE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}`
+    : 'tasas iniciales — pulsa actualizar';
+  document.getElementById('manBcv').value = bcv;
+  document.getElementById('manBin').value = binance;
+}
+
+// ── Tabs ────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+}
+
+// ── Movimientos ─────────────────────────────────────────
+function addTx() {
+  const fecha = document.getElementById('txFecha').value || todayStr();
+  const desc = document.getElementById('txDesc').value.trim() || 'Sin descripción';
+  const cat = document.getElementById('txCat').value;
+  const monto = parseFloat(document.getElementById('txMonto').value);
+  const moneda = document.getElementById('txMoneda').value;
+  const tipo = document.getElementById('txTipo').value;
+  if (!monto || monto <= 0) return toast('Ingresa un monto válido', true);
+  D.txs.push({ id: uid(), fecha, desc, cat, monto, moneda, tipo, costoUSDT: costUSDT(monto, moneda) });
+  save(); renderAll();
+  document.getElementById('txMonto').value = ''; document.getElementById('txDesc').value = '';
+  toast('Movimiento guardado ✓');
+}
+function delTx(id) {
+  const tx = D.txs.find(t => t.id === id);
+  if (!tx) return;
+  if (!confirm('¿Eliminar este movimiento?' + (tx.debtId ? ' El abono se devolverá al saldo de la deuda.' : ''))) return;
+  if (tx.debtId) {
+    const d = D.debts.find(x => x.id === tx.debtId);
+    if (d) d.saldo += tx.monto;
+  }
+  D.txs = D.txs.filter(t => t.id !== id);
+  save(); renderAll();
+}
+
+// ── Deudas ──────────────────────────────────────────────
+const debtModal = document.getElementById('debtModal');
+const payModal = document.getElementById('payModal');
+let payingDebtId = null;
+
+function openDebtModal() {
+  document.getElementById('dmNombre').value = '';
+  document.getElementById('dmSaldo').value = '';
+  document.getElementById('dmCuota').value = '';
+  debtModal.showModal();
+}
+function saveDebt() {
+  const nombre = document.getElementById('dmNombre').value.trim();
+  const saldo = parseFloat(document.getElementById('dmSaldo').value);
+  const moneda = document.getElementById('dmMoneda').value;
+  const cuota = parseFloat(document.getElementById('dmCuota').value) || 0;
+  if (!nombre || !saldo) return toast('Completa nombre y saldo', true);
+  D.debts.push({ id: uid(), nombre, moneda, saldoInicial: saldo, saldo, cuota, cat: 'otros' });
+  save(); renderAll(); debtModal.close(); toast('Deuda agregada ✓');
+}
+function openPay(id) {
+  const d = D.debts.find(x => x.id === id);
+  if (!d) return;
+  payingDebtId = id;
+  document.getElementById('pmName').textContent = d.nombre;
+  document.getElementById('pmCur').textContent = curLabel[d.moneda];
+  document.getElementById('pmFecha').value = todayStr();
+  document.getElementById('pmMonto').value = d.cuota || '';
+  pmPreview();
+  payModal.showModal();
+}
+function pmPreview() {
+  const d = D.debts.find(x => x.id === payingDebtId);
+  const monto = parseFloat(document.getElementById('pmMonto').value) || 0;
+  const el = document.getElementById('pmCosto');
+  if (!d || !monto) { el.textContent = ''; return; }
+  const costo = costUSDT(monto, d.moneda);
+  el.textContent = d.moneda === 'USD_BCV'
+    ? `Costo real: ${fmt(costo)} USDT (necesitas vender esto en Binance) · en Bs: ${fmt(monto * D.rates.bcv, 0)} Bs`
+    : `Costo real: ${fmt(costo)} USDT`;
+}
+function savePay() {
+  const d = D.debts.find(x => x.id === payingDebtId);
+  const monto = parseFloat(document.getElementById('pmMonto').value);
+  const fecha = document.getElementById('pmFecha').value || todayStr();
+  if (!d || !monto || monto <= 0) return toast('Monto inválido', true);
+  d.saldo = Math.max(0, d.saldo - monto);
+  D.txs.push({
+    id: uid(), fecha, desc: 'Abono ' + d.nombre, cat: d.cat || 'otros',
+    monto, moneda: d.moneda, tipo: 'gasto', costoUSDT: costUSDT(monto, d.moneda), debtId: d.id
+  });
+  save(); renderAll(); payModal.close();
+  toast(d.saldo === 0 ? '🎉 ¡Deuda saldada!' : 'Abono registrado ✓');
+}
+function delDebt(id) {
+  const d = D.debts.find(x => x.id === id);
+  if (!d) return;
+  if (!confirm(`¿Eliminar la deuda "${d.nombre}"? El historial de abonos se conserva.`)) return;
+  D.debts = D.debts.filter(x => x.id !== id);
+  save(); renderAll();
+}
+
+// ── Boda ────────────────────────────────────────────────
+const aporteModal = document.getElementById('aporteModal');
+function openAporte() {
+  document.getElementById('apFecha').value = todayStr();
+  document.getElementById('apMonto').value = '';
+  document.getElementById('apDesc').value = '';
+  aporteModal.showModal();
+}
+function saveAporte() {
+  const monto = parseFloat(document.getElementById('apMonto').value);
+  const fecha = document.getElementById('apFecha').value || todayStr();
+  const desc = document.getElementById('apDesc').value.trim() || 'Aporte boda';
+  if (!monto || monto <= 0) return toast('Monto inválido', true);
+  D.txs.push({ id: uid(), fecha, desc, cat: 'boda', monto, moneda: 'USDT', tipo: 'gasto', costoUSDT: monto, boda: true });
+  save(); renderAll(); aporteModal.close(); toast('Aporte guardado ✓ 💍');
+}
+function saveBodaCfg() {
+  const t = parseFloat(document.getElementById('cfgBodaTarget').value);
+  const f = document.getElementById('cfgBodaFecha').value;
+  if (t) D.boda.target = t;
+  if (f) D.boda.fecha = f;
+  save(); renderAll(); toast('Meta actualizada ✓');
+}
+
+// ── Presupuesto (Ajustes) ───────────────────────────────
+function addPlanCat() {
+  const nombre = document.getElementById('newCatName').value.trim();
+  const monto = parseFloat(document.getElementById('newCatAmt').value) || 0;
+  const moneda = document.getElementById('newCatCur').value;
+  if (!nombre) return toast('Ponle nombre a la categoría', true);
+  D.plan.push({ id: uid(), nombre, monto, moneda });
+  save(); renderAll();
+  document.getElementById('newCatName').value = ''; document.getElementById('newCatAmt').value = '';
+}
+function delPlanCat(id) {
+  D.plan = D.plan.filter(p => p.id !== id);
+  save(); renderAll();
+}
+function updPlan(id, field, val) {
+  const p = D.plan.find(x => x.id === id);
+  if (!p) return;
+  p[field] = field === 'monto' ? (parseFloat(val) || 0) : val;
+  save(); renderAll();
+}
+function updIncome(val) {
+  D.income = parseFloat(val) || 0;
+  save(); renderAll();
+}
+
+// ── Respaldo ────────────────────────────────────────────
+function exportData() {
+  const blob = new Blob([JSON.stringify(D, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `respaldo-contabilidad-${todayStr()}.json`;
+  a.click();
+  toast('Respaldo descargado ✓');
+}
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.txs || !data.debts) throw new Error('formato');
+      if (!confirm('Esto reemplaza TODOS los datos actuales con el respaldo. ¿Continuar?')) return;
+      D = data; save(); renderAll(); toast('Respaldo importado ✓');
+    } catch { toast('Archivo de respaldo inválido', true); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// ── Render ──────────────────────────────────────────────
+function renderAll() {
+  renderRates();
+  renderResumen();
+  renderDebts();
+  renderTxs();
+  renderBoda();
+  renderAjustes();
+  renderCalc();
+}
+
+function monthTxs(mes) {
+  return D.txs.filter(t => monthKey(t.fecha) === mes);
+}
+
+function renderResumen() {
+  const mes = monthKey();
+  document.getElementById('mesActualLbl').textContent = '· ' + new Date().toLocaleDateString('es-VE', { month: 'long', year: 'numeric' });
+
+  // Deuda total en USDT reales
+  const totalDebt = D.debts.reduce((s, d) => s + costUSDT(d.saldo, d.moneda), 0);
+  document.getElementById('sumDebt').textContent = '$' + fmt(totalDebt);
+  document.getElementById('sumDebtNote').textContent = D.debts.filter(d => d.saldo > 0).length + ' deudas activas · en USDT reales';
+
+  const txs = monthTxs(mes);
+  const gastado = txs.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.costoUSDT, 0);
+  const ingresos = txs.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.costoUSDT, 0);
+  document.getElementById('sumSpent').textContent = '$' + fmt(gastado);
+  document.getElementById('sumSpentNote').textContent = ingresos > 0 ? `ingresos registrados: $${fmt(ingresos)}` : 'incluye abonos y aportes';
+  document.getElementById('sumFree').textContent = '$' + fmt(D.income - gastado);
+  document.getElementById('sumIncome').textContent = fmt(D.income, 0);
+
+  const saved = bodaSaved();
+  document.getElementById('sumBoda').textContent = '$' + fmt(saved, 0);
+  document.getElementById('sumBodaNote').textContent = fmt(saved / D.boda.target * 100, 1) + '% de $' + fmt(D.boda.target, 0);
+
+  // Tabla presupuesto
+  const tb = document.querySelector('#budgetTable tbody');
+  tb.innerHTML = '';
+  let totalPlan = 0;
+  for (const p of D.plan) {
+    const planUSDT = costUSDT(p.monto, p.moneda);
+    totalPlan += planUSDT;
+    const spent = txs.filter(t => t.tipo === 'gasto' && t.cat === p.id).reduce((s, t) => s + t.costoUSDT, 0);
+    const left = planUSDT - spent;
+    const pct = planUSDT > 0 ? Math.min(100, spent / planUSDT * 100) : 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p.nombre}${p.moneda === 'USD_BCV' ? ' <span class="tag bcv">BCV</span>' : ''}</td>
+      <td class="num muted">$${fmt(planUSDT)}${p.moneda === 'USD_BCV' ? `<div class="small">($${fmt(p.monto, 0)} BCV)</div>` : ''}</td>
+      <td class="num">$${fmt(spent)}</td>
+      <td class="num ${left < 0 ? 'red' : 'green'}">$${fmt(left)}</td>
+      <td><div class="bar ${pct > 90 ? 'warn' : ''}"><div style="width:${pct}%${pct > 100 ? ';background:var(--red)' : ''}"></div></div></td>`;
+    tb.appendChild(tr);
+  }
+  const trTotal = document.createElement('tr');
+  const totalSpent = txs.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.costoUSDT, 0);
+  trTotal.innerHTML = `<td><b>Total</b></td><td class="num"><b>$${fmt(totalPlan)}</b></td>
+    <td class="num"><b>$${fmt(totalSpent)}</b></td>
+    <td class="num"><b class="${D.income - totalSpent < 0 ? 'red' : 'green'}">$${fmt(D.income - totalSpent)}</b> <span class="muted small">del ingreso</span></td><td></td>`;
+  tb.appendChild(trTotal);
+}
+
+function renderDebts() {
+  const list = document.getElementById('debtList');
+  list.innerHTML = '';
+  if (!D.debts.length) list.innerHTML = '<p class="muted" style="margin-bottom:12px">No tienes deudas registradas 🎉</p>';
+  for (const d of D.debts) {
+    const paid = d.saldoInicial - d.saldo;
+    const pct = d.saldoInicial > 0 ? paid / d.saldoInicial * 100 : 0;
+    const realCost = costUSDT(d.saldo, d.moneda);
+    const months = d.cuota > 0 ? Math.ceil(d.saldo / d.cuota) : null;
+    const card = document.createElement('div');
+    card.className = 'card debt-card';
+    card.innerHTML = `
+      <div class="debt-head">
+        <span class="name">${d.nombre} <span class="tag ${d.moneda === 'USDT' ? 'usdt' : 'bcv'}">${curLabel[d.moneda]}</span></span>
+        <span class="${d.saldo === 0 ? 'green' : ''}" style="font-weight:600">${d.saldo === 0 ? '✓ Saldada' : 'Debe: $' + fmt(d.saldo)}</span>
+      </div>
+      <div class="bar"><div style="width:${pct}%"></div></div>
+      <div class="debt-nums">
+        <span>Pagado: <b>$${fmt(paid)}</b> de $${fmt(d.saldoInicial)}</span>
+        ${d.moneda === 'USD_BCV' ? `<span>Costo real restante: <b class="green">$${fmt(realCost)} USDT</b></span>` : ''}
+        ${d.cuota ? `<span>Abono plan: <b>$${fmt(d.cuota, 0)}/mes</b></span>` : ''}
+        ${months && d.saldo > 0 ? `<span>Te quedan <b>${months} ${months === 1 ? 'mes' : 'meses'}</b></span>` : ''}
+      </div>
+      <div class="debt-actions">
+        ${d.saldo > 0 ? `<button class="btn small" onclick="openPay('${d.id}')">Registrar abono</button>` : ''}
+        <button class="btn small danger" onclick="delDebt('${d.id}')">Eliminar</button>
+      </div>`;
+    list.appendChild(card);
+  }
+}
+
+function renderTxs() {
+  // selector de mes
+  const sel = document.getElementById('movMonth');
+  const months = [...new Set(D.txs.map(t => monthKey(t.fecha)))].sort().reverse();
+  const current = monthKey();
+  if (!months.includes(current)) months.unshift(current);
+  const prev = sel.value;
+  sel.innerHTML = months.map(m => `<option value="${m}">${new Date(m + '-02').toLocaleDateString('es-VE', { month: 'long', year: 'numeric' })}</option>`).join('');
+  sel.value = months.includes(prev) ? prev : current;
+
+  const tb = document.querySelector('#txTable tbody');
+  tb.innerHTML = '';
+  const txs = monthTxs(sel.value).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  if (!txs.length) tb.innerHTML = '<tr><td colspan="6" class="muted">Sin movimientos este mes</td></tr>';
+  for (const t of txs) {
+    const catName = D.plan.find(p => p.id === t.cat)?.nombre || (t.cat === 'boda' ? 'Boda' : t.cat);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="muted">${t.fecha.slice(8)}/${t.fecha.slice(5, 7)}</td>
+      <td>${t.desc}</td><td class="muted">${catName}</td>
+      <td class="num">${t.tipo === 'ingreso' ? '<span class="green">+</span>' : ''}${fmt(t.monto)} <span class="muted small">${curLabel[t.moneda]}</span></td>
+      <td class="num ${t.tipo === 'ingreso' ? 'green' : ''}">$${fmt(t.costoUSDT)}</td>
+      <td><button class="btn small danger" onclick="delTx('${t.id}')">✕</button></td>`;
+    tb.appendChild(tr);
+  }
+}
+
+function bodaSaved() {
+  return D.txs.filter(t => t.boda).reduce((s, t) => s + t.monto, 0);
+}
+function renderBoda() {
+  const saved = bodaSaved();
+  const { target, fecha } = D.boda;
+  document.getElementById('bodaSaved').textContent = '$' + fmt(saved, 0);
+  document.getElementById('bodaTarget').textContent = fmt(target, 0);
+  document.getElementById('bodaBar').style.width = Math.min(100, saved / target * 100) + '%';
+  const [y, m] = fecha.split('-').map(Number);
+  const now = new Date();
+  const monthsLeft = Math.max(0, (y - now.getFullYear()) * 12 + (m - 1 - now.getMonth()));
+  const needed = monthsLeft > 0 ? (target - saved) / monthsLeft : target - saved;
+  document.getElementById('bodaProj').innerHTML = monthsLeft > 0
+    ? `Faltan <b>${monthsLeft} meses</b> para ${new Date(y, m - 1).toLocaleDateString('es-VE', { month: 'long', year: 'numeric' })} → necesitas ahorrar <b class="blue">$${fmt(Math.max(0, needed), 0)}/mes</b>`
+    : `¡La fecha llegó! ${saved >= target ? '🎉 Meta cumplida' : 'Faltan $' + fmt(target - saved, 0)}`;
+
+  const tb = document.querySelector('#bodaTable tbody');
+  tb.innerHTML = '';
+  const aportes = D.txs.filter(t => t.boda).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  if (!aportes.length) tb.innerHTML = '<tr><td colspan="4" class="muted">Aún no hay aportes — ¡registra el primero!</td></tr>';
+  for (const t of aportes) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="muted">${t.fecha}</td><td>${t.desc}</td>
+      <td class="num blue">$${fmt(t.monto)}</td>
+      <td><button class="btn small danger" onclick="delTx('${t.id}')">✕</button></td>`;
+    tb.appendChild(tr);
+  }
+}
+
+function renderAjustes() {
+  document.getElementById('cfgIncome').value = D.income;
+  document.getElementById('cfgIncome').onchange = e => updIncome(e.target.value);
+  document.getElementById('cfgBodaTarget').value = D.boda.target;
+  document.getElementById('cfgBodaFecha').value = D.boda.fecha;
+
+  const tb = document.querySelector('#planTable tbody');
+  tb.innerHTML = '';
+  for (const p of D.plan) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p.nombre}</td>
+      <td class="num"><input type="number" step="any" value="${p.monto}" style="max-width:110px;text-align:right" onchange="updPlan('${p.id}','monto',this.value)"></td>
+      <td><select style="max-width:120px" onchange="updPlan('${p.id}','moneda',this.value)">
+        <option value="USDT" ${p.moneda === 'USDT' ? 'selected' : ''}>USDT</option>
+        <option value="USD_BCV" ${p.moneda === 'USD_BCV' ? 'selected' : ''}>USD BCV</option>
+      </select></td>
+      <td><button class="btn small danger" onclick="delPlanCat('${p.id}')">✕</button></td>`;
+    tb.appendChild(tr);
+  }
+
+  // categorías en el form de movimientos
+  const sel = document.getElementById('txCat');
+  const prev = sel.value;
+  sel.innerHTML = D.plan.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+function renderCalc() {
+  const monto = parseFloat(document.getElementById('calcMonto').value);
+  const moneda = document.getElementById('calcMoneda').value;
+  const out = document.getElementById('calcOut');
+  const detail = document.getElementById('calcDetail');
+  if (!monto) { out.textContent = '= …'; detail.textContent = ''; return; }
+  const costo = costUSDT(monto, moneda);
+  out.textContent = `= ${fmt(costo)} USDT tuyos`;
+  if (moneda === 'USD_BCV') {
+    detail.textContent = `Son ${fmt(monto * D.rates.bcv, 0)} Bs a tasa BCV. Vendiendo USDT en Binance a ${fmt(D.rates.binance)} solo necesitas ${fmt(costo)} USDT — te ahorras $${fmt(monto - costo)} por la brecha.`;
+  } else if (moneda === 'BS') {
+    detail.textContent = `Vendiendo USDT a ${fmt(D.rates.binance)} Bs.`;
+  } else detail.textContent = '';
+}
+
+// ── Toast ───────────────────────────────────────────────
+let toastTimer;
+function toast(msg, warn) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = warn ? 'var(--yellow)' : 'var(--green)';
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// ── Init ────────────────────────────────────────────────
+document.getElementById('txFecha').value = todayStr();
+document.getElementById('calcMonto').addEventListener('input', renderCalc);
+document.getElementById('calcMoneda').addEventListener('change', renderCalc);
+renderAll();
+fetchRates(false);
+</script>
+</body>
+</html>

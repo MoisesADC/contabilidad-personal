@@ -620,18 +620,16 @@ async function pullCloud() {
 async function cloudSendCode() {
   const email = document.getElementById('cloudEmail').value.trim();
   if (!email.includes('@')) return toast('Escribe tu correo', true);
-  const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+  const btn = document.getElementById('cloudSendBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true, emailRedirectTo: location.origin + location.pathname }
+  });
+  if (btn) { btn.disabled = false; btn.textContent = 'Enviarme el enlace'; }
   if (error) return toast('Error: ' + error.message, true);
   document.getElementById('cloudStep2').style.display = 'block';
-  toast('Te enviamos un código de 6 dígitos al correo 📧');
-}
-async function cloudVerify() {
-  const email = document.getElementById('cloudEmail').value.trim();
-  const token = document.getElementById('cloudCode').value.trim();
-  if (!token) return toast('Escribe el código', true);
-  const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
-  if (error) return toast('Código incorrecto o vencido: ' + error.message, true);
-  toast('¡Sesión iniciada! ✓');
+  toast('Correo enviado 📧 — abre el enlace "Sign in" desde este dispositivo');
 }
 async function cloudLogout() {
   await sb.auth.signOut();
@@ -651,16 +649,13 @@ function renderCloud() {
   }
   if (!cloudUser) {
     card.innerHTML = `
-      <p class="small muted" style="margin-bottom:10px">Inicia sesión con tu correo para que tus datos se guarden en la nube y se sincronicen entre tu teléfono y tu PC. Te enviaremos un código, sin contraseñas.</p>
+      <p class="small muted" style="margin-bottom:10px">Inicia sesión con tu correo para que tus datos se guarden en la nube y se sincronicen entre tu teléfono y tu PC. Sin contraseñas: te llega un correo con un enlace y listo.</p>
       <div class="form-grid">
         <label class="field">Tu correo<input type="email" id="cloudEmail" placeholder="tucorreo@gmail.com"></label>
       </div>
-      <button class="btn" onclick="cloudSendCode()">Enviarme el código</button>
-      <div id="cloudStep2" style="display:none;margin-top:12px">
-        <div class="form-grid">
-          <label class="field">Código de 6 dígitos<input type="text" id="cloudCode" inputmode="numeric" placeholder="123456"></label>
-        </div>
-        <button class="btn" onclick="cloudVerify()">Entrar</button>
+      <button class="btn" id="cloudSendBtn" onclick="cloudSendCode()">Enviarme el enlace</button>
+      <div id="cloudStep2" style="display:none;margin-top:12px" class="hint">
+        📧 Revisa tu correo (también <b>spam</b>) y toca el enlace <b>"Sign in"</b> desde <b>este mismo dispositivo</b>. Al abrirse la app, ya estarás dentro. El correo gratuito tarda hasta 1-2 min y solo se pueden pedir ~2 por hora.
       </div>`;
   } else {
     card.innerHTML = `

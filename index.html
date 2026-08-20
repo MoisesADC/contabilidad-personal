@@ -63,7 +63,29 @@
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
   .card {
     background: var(--panel); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
+    border-radius: var(--radius); padding: 16px; position: relative;
+  }
+  .card .goto {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--panel2); color: var(--green); border: 1px solid var(--border);
+    border-radius: 8px; width: 28px; height: 28px; font-size: 1.05rem; font-weight: 700;
+    cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center;
+  }
+  .card .goto:hover { background: var(--green); color: #06281c; }
+  details.panel { margin-top: 14px; }
+  details.panel > summary {
+    cursor: pointer; list-style: none; user-select: none;
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px 14px; font-weight: 600; font-size: .92rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  details.panel > summary::-webkit-details-marker { display: none; }
+  details.panel > summary::after { content: '▾'; margin-left: auto; color: var(--muted); transition: transform .2s; }
+  details.panel[open] > summary::after { transform: rotate(180deg); }
+  details.panel[open] > summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: none; }
+  details.panel > .panel-body {
+    background: var(--panel); border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius); padding: 12px 14px;
   }
   .card .lbl { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
   .card .big { font-size: 1.55rem; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
@@ -170,17 +192,41 @@
   <header>
     <h1>💵 Mi Contabilidad</h1>
     <div class="sub">Tus finanzas en dólares reales · datos guardados solo en este dispositivo</div>
-    <div class="rates">
-      <div class="rate-chip"><span class="lbl">BCV oficial</span><span class="val yellow" id="rBcv">—</span></div>
-      <div class="rate-chip"><span class="lbl">Binance P2P</span><span class="val" id="rBinRaw">—</span></div>
-      <div class="rate-chip"><span class="lbl">Tu tasa real ▾<span id="rAdjPct"></span></span><span class="val green" id="rBin">—</span></div>
-      <div class="rate-chip"><span class="lbl">Brecha</span><span class="val" id="rGap">—</span></div>
-      <div class="rate-chip"><span class="lbl">$1 BCV te cuesta</span><span class="val green" id="rFactor">—</span></div>
-      <div class="actions">
-        <button class="btn small" onclick="fetchRates(true)">↻ Actualizar tasas</button>
-        <span class="stamp" id="rStamp">sin datos</span>
+    <details class="panel" open>
+      <summary>💱 Tasas del día <span class="stamp muted small" id="rStampMini"></span></summary>
+      <div class="panel-body">
+        <div class="rates" style="margin-top:0;border:none;padding:0;background:none">
+          <div class="rate-chip"><span class="lbl">BCV oficial</span><span class="val yellow" id="rBcv">—</span></div>
+          <div class="rate-chip"><span class="lbl">Binance P2P</span><span class="val" id="rBinRaw">—</span></div>
+          <div class="rate-chip"><span class="lbl">Tu tasa real ▾<span id="rAdjPct"></span></span><span class="val green" id="rBin">—</span></div>
+          <div class="rate-chip"><span class="lbl">Brecha</span><span class="val" id="rGap">—</span></div>
+          <div class="rate-chip"><span class="lbl">$1 BCV te cuesta</span><span class="val green" id="rFactor">—</span></div>
+          <div class="actions">
+            <button class="btn small" onclick="fetchRates(true)">↻ Actualizar tasas</button>
+            <span class="stamp" id="rStamp">sin datos</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </details>
+    <details class="panel">
+      <summary>🧮 Calculadora: ¿cuánto me cuesta de verdad?</summary>
+      <div class="panel-body">
+        <div class="calc">
+          <label class="field" style="max-width:140px">Monto
+            <input type="number" id="calcMonto" placeholder="50" step="any">
+          </label>
+          <label class="field" style="max-width:170px">Está expresado en
+            <select id="calcMoneda">
+              <option value="USD_BCV">Dólares (tasa BCV)</option>
+              <option value="BS">Bolívares</option>
+              <option value="USDT">USDT / dólar real</option>
+            </select>
+          </label>
+          <div class="result" id="calcOut">= …</div>
+        </div>
+        <div class="small muted" id="calcDetail"></div>
+      </div>
+    </details>
   </header>
 
   <nav>
@@ -196,21 +242,25 @@
   <div class="tab active" id="tab-resumen">
     <div class="cards">
       <div class="card">
+        <button class="goto" title="Ver y editar deudas" onclick="showTab('deudas')">+</button>
         <div class="lbl">Deuda total restante</div>
         <div class="big red" id="sumDebt">—</div>
         <div class="note" id="sumDebtNote"></div>
       </div>
       <div class="card">
+        <button class="goto" title="Registrar movimientos" onclick="showTab('movs')">+</button>
         <div class="lbl">Gastado este mes</div>
         <div class="big" id="sumSpent">—</div>
         <div class="note">en USDT reales</div>
       </div>
       <div class="card">
+        <button class="goto" title="Editar ingreso y presupuesto" onclick="showTab('ajustes')">+</button>
         <div class="lbl">Disponible del mes</div>
         <div class="big green" id="sumFree">—</div>
         <div class="note">de tu ingreso de $<span id="sumIncome"></span></div>
       </div>
       <div class="card">
+        <button class="goto" title="Ver y crear metas" onclick="showTab('metas')">+</button>
         <div class="lbl">Ahorrado en metas</div>
         <div class="big blue" id="sumGoals">—</div>
         <div class="note" id="sumGoalsNote"></div>
@@ -233,23 +283,6 @@
       </table>
     </div>
 
-    <h2>Calculadora: ¿cuánto me cuesta de verdad?</h2>
-    <div class="card">
-      <div class="calc">
-        <label class="field" style="max-width:140px">Monto
-          <input type="number" id="calcMonto" placeholder="50" step="any">
-        </label>
-        <label class="field" style="max-width:170px">Está expresado en
-          <select id="calcMoneda">
-            <option value="USD_BCV">Dólares (tasa BCV)</option>
-            <option value="BS">Bolívares</option>
-            <option value="USDT">USDT / dólar real</option>
-          </select>
-        </label>
-        <div class="result" id="calcOut">= …</div>
-      </div>
-      <div class="small muted" id="calcDetail"></div>
-    </div>
     <div class="hint">💡 <b>Regla de oro:</b> no guardes bolívares. Vende USDT solo para lo que vas a pagar hoy o esta semana. Lo que esté a tasa BCV te sale ~<span id="hintPct">15</span>% más barato pagándolo con bolívares recién vendidos.</div>
   </div>
 
@@ -701,6 +734,8 @@ function renderRates() {
   document.getElementById('rGap').textContent = fmt((eff / bcv - 1) * 100, 1) + '%';
   document.getElementById('rFactor').textContent = '$' + fmt(bcv / eff, 3);
   document.getElementById('hintPct').textContent = fmt(100 - (bcv / eff) * 100, 0);
+  const mini = document.getElementById('rStampMini');
+  if (mini) mini.textContent = `BCV ${fmt(bcv, 0)} · Binance ${fmt(eff, 0)}`;
   document.getElementById('rStamp').textContent = updatedAt
     ? `${source === 'manual' ? 'manual' : 'API'} · ${new Date(updatedAt).toLocaleString('es-VE', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}`
     : 'tasas iniciales — pulsa actualizar';

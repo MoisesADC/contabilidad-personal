@@ -368,7 +368,21 @@
       <button class="btn sec" onclick="addPlanCat()">+ Agregar categoría</button>
     </div>
 
-    <h2>Lector de facturas (OCR)</h2>
+    <h2>🤖 IA para facturas y capturas</h2>
+    <div class="card">
+      <p class="small muted" style="margin-bottom:10px">Con una clave de IA, la foto de la factura se analiza completa: detecta monto, moneda, categoría y descripción automáticamente. <b>Gemini es gratis</b> (clave en <b>aistudio.google.com/apikey</b>, sin tarjeta). Claude es de pago pero de mayor calidad (clave en <b>console.anthropic.com</b>). Tu clave se guarda solo en este dispositivo.</p>
+      <div class="form-grid">
+        <label class="field">Proveedor<select id="cfgAiProv">
+          <option value="">Sin IA (usar OCR simple)</option>
+          <option value="gemini">Google Gemini (gratis)</option>
+          <option value="claude">Claude (pago, mejor)</option>
+        </select></label>
+        <label class="field">API key<input type="password" id="cfgAiKey" placeholder="pega tu clave aquí"></label>
+      </div>
+      <button class="btn sec" onclick="saveAI()">Guardar IA</button>
+    </div>
+
+    <h2>Lector de facturas (OCR simple, respaldo)</h2>
     <div class="card">
       <p class="small muted" style="margin-bottom:10px">Para que la app lea fotos de facturas y capturas de pago necesitas una clave gratuita de <b>OCR.space</b> (25.000 lecturas al mes gratis). Pídela en <b>ocr.space/ocrapi/freekey</b> con tu correo y pégala aquí. Se guarda solo en este dispositivo.</p>
       <div class="form-grid">
@@ -486,7 +500,8 @@ const DEFAULT_DATA = {
   debts: [],
   goals: [],
   txs: [],
-  ocrKey: ''
+  ocrKey: '',
+  ai: { provider: '', key: '' }
 };
 
 let D = load();
@@ -497,6 +512,7 @@ function load() {
       const d = JSON.parse(raw);
       if (d.rates.ajuste == null) d.rates.ajuste = 0.4;
       if (!d.goals) d.goals = [];
+      if (!d.ai) d.ai = { provider: '', key: '' };
       return d;
     }
   } catch (e) { console.warn(e); }
@@ -655,14 +671,90 @@ function parseVoice(text) {
   toast(monto ? `Entendí: ${fmt(monto)} ${curLabel[moneda]} — revisa y guarda` : 'Te escuché, pero no capté el monto — escríbelo', !monto);
 }
 
+// ── IA (Gemini / Claude) para facturas ──────────────────
+function saveAI() {
+  D.ai = {
+    provider: document.getElementById('cfgAiProv').value,
+    key: document.getElementById('cfgAiKey').value.trim()
+  };
+  save();
+  toast(D.ai.provider && D.ai.key ? 'IA configurada ✓ 🤖' : 'IA desactivada — se usará OCR simple');
+}
+function fileToB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+function aiPrompt() {
+  const cats = D.plan.map(p => p.nombre).join(', ');
+  return `Analiza esta imagen (factura, recibo o captura de un pago móvil/transferencia de Venezuela). Responde SOLO un JSON válido, sin texto extra ni markdown, con esta forma exacta:
+{"descripcion":"resumen corto de la compra o pago (máx 40 caracteres)","monto":numero,"moneda":"BS"|"USD","categoria":"una de: ${cats}","tipo":"gasto"|"ingreso"}
+Reglas: en Venezuela los montos en bolívares suelen ser cifras grandes (cientos o miles); si la factura está en Bs usa moneda "BS", si está en dólares usa "USD". El monto es el TOTAL pagado. Si es una captura de pago móvil o transferencia recibida por el dueño del teléfono, tipo es "ingreso"; si es una compra o pago enviado, "gasto".`;
+}
+async function aiAnalyze(file) {
+  const b64 = await fileToB64(file);
+  const mime = file.type || 'image/jpeg';
+  let text;
+  if (D.ai.provider === 'gemini') {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(D.ai.key), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ inline_data: { mime_type: mime, data: b64 } }, { text: aiPrompt() }] }] })
+    });
+    const json = await res.json();
+    if (json.error) throw new Error(json.error.message || 'error Gemini');
+    text = json.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+  } else {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': D.ai.key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-opus-5', max_tokens: 2048,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
+          { type: 'text', text: aiPrompt() }
+        ] }]
+      })
+    });
+    const json = await res.json();
+    if (json.error) throw new Error(json.error.message || 'error Claude');
+    text = (json.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  }
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('la IA no devolvió datos legibles');
+  return JSON.parse(m[0]);
+}
+function applyAI(r) {
+  if (r.monto) document.getElementById('txMonto').value = r.monto;
+  document.getElementById('txMoneda').value = r.moneda === 'BS' ? 'BS' : 'USD_BCV';
+  if (r.descripcion) document.getElementById('txDesc').value = r.descripcion;
+  document.getElementById('txTipo').value = r.tipo === 'ingreso' ? 'ingreso' : 'gasto';
+  const cat = D.plan.find(p => p.nombre.toLowerCase() === (r.categoria || '').toLowerCase());
+  const sel = document.getElementById('txCat');
+  if (cat && [...sel.options].some(o => o.value === cat.id)) sel.value = cat.id;
+  toast(`🤖 ${r.descripcion || 'Listo'}: ${fmt(r.monto)} ${r.moneda === 'BS' ? 'Bs' : '$'} → revisa y guarda`);
+}
+
 // ── OCR (foto de factura / captura de pago) ─────────────
 async function ocrImage(input) {
   const file = input.files[0];
   input.value = '';
   if (!file) return;
+  if (D.ai?.provider && D.ai?.key) {
+    toast('Analizando con IA… 🤖⏳');
+    try { applyAI(await aiAnalyze(file)); return; }
+    catch (e) { console.warn(e); toast('IA falló (' + e.message.slice(0, 60) + ') — probando OCR simple', true); }
+  }
   if (!D.ocrKey) {
     showTab('ajustes');
-    return toast('Primero configura tu clave gratuita de OCR.space en Ajustes', true);
+    return toast('Configura una IA (Gemini gratis) o una clave OCR.space en Ajustes', true);
   }
   toast('Leyendo imagen… ⏳');
   try {
@@ -1150,6 +1242,8 @@ function renderAjustes() {
   document.getElementById('cfgIncome').value = D.income;
   document.getElementById('cfgIncome').onchange = e => updIncome(e.target.value);
   document.getElementById('cfgOcrKey').value = D.ocrKey || '';
+  document.getElementById('cfgAiProv').value = D.ai?.provider || '';
+  document.getElementById('cfgAiKey').value = D.ai?.key || '';
 
   const tb = document.querySelector('#planTable tbody');
   tb.innerHTML = '';

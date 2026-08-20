@@ -198,7 +198,7 @@
         <div class="rates" style="margin-top:0;border:none;padding:0;background:none">
           <div class="rate-chip"><span class="lbl">BCV oficial</span><span class="val yellow" id="rBcv">—</span></div>
           <div class="rate-chip"><span class="lbl">Binance P2P</span><span class="val" id="rBinRaw">—</span></div>
-          <div class="rate-chip"><span class="lbl">Tu tasa real ▾<span id="rAdjPct"></span></span><span class="val green" id="rBin">—</span></div>
+          <div class="rate-chip"><span class="lbl">Tu tasa real <span id="rAdjPct"></span></span><span class="val green" id="rBin">—</span></div>
           <div class="rate-chip"><span class="lbl">Brecha</span><span class="val" id="rGap">—</span></div>
           <div class="rate-chip"><span class="lbl">$1 BCV te cuesta</span><span class="val green" id="rFactor">—</span></div>
           <div class="actions">
@@ -727,7 +727,7 @@ function renderRates() {
   document.getElementById('rBcv').textContent = fmt(bcv);
   document.getElementById('rBinRaw').textContent = fmt(binance);
   document.getElementById('rBin').textContent = fmt(eff);
-  document.getElementById('rAdjPct').textContent = ` (-${fmt(ajuste, 1)}%)`;
+  document.getElementById('rAdjPct').textContent = `(Estimado -${fmt(ajuste, 1)}%)`;
   document.getElementById('rGap').textContent = fmt((eff / bcv - 1) * 100, 1) + '%';
   document.getElementById('rFactor').textContent = '$' + fmt(bcv / eff, 3);
   document.getElementById('hintPct').textContent = fmt(100 - (bcv / eff) * 100, 0);

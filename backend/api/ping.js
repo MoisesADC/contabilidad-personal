@@ -5,6 +5,7 @@ module.exports = (req, res) => {
   res.end(
     JSON.stringify({
       ok: true,
+      version: 'diag-2',
       node: process.version,
       tiene_DATABASE_URL: Boolean(process.env.DATABASE_URL),
       tiene_SUPABASE_URL: Boolean(process.env.SUPABASE_URL),

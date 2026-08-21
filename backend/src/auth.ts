@@ -5,18 +5,24 @@ import {
   UnauthorizedException,
   createParamDecorator,
 } from '@nestjs/common';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
-
 // Valida el token que Supabase le dio al usuario al iniciar sesión.
 // Las claves públicas se descargan del proyecto Supabase (JWKS) y se cachean.
-let jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
-function getJwks() {
+// Nota: jose v6 es solo ESM; se carga con import() dinámico real (el
+// Function evita que TypeScript lo convierta en require al compilar a CJS).
+type Jose = typeof import('jose');
+let josePromise: Promise<Jose> | null = null;
+const cargarJose = () =>
+  (josePromise ??= new Function('return import("jose")')() as Promise<Jose>);
+
+let jwks: unknown = null;
+async function getJwks() {
+  const jose = await cargarJose();
   if (!jwks) {
     const url = process.env.SUPABASE_URL;
     if (!url) throw new Error('Falta SUPABASE_URL en el .env');
-    jwks = createRemoteJWKSet(new URL(`${url}/auth/v1/.well-known/jwks.json`));
+    jwks = jose.createRemoteJWKSet(new URL(`${url}/auth/v1/.well-known/jwks.json`));
   }
-  return jwks;
+  return { jose, jwks: jwks as Parameters<Jose['jwtVerify']>[1] };
 }
 
 @Injectable()
@@ -27,7 +33,8 @@ export class AuthGuard implements CanActivate {
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) throw new UnauthorizedException('Falta el token de sesión');
     try {
-      const { payload } = await jwtVerify(token, getJwks());
+      const { jose, jwks } = await getJwks();
+      const { payload } = await jose.jwtVerify(token, jwks);
       req.userId = payload.sub;
       return true;
     } catch {

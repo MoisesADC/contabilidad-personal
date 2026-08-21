@@ -105,6 +105,18 @@ export const api = {
       frecDias?: number;
       proxima?: string;
     }) => apiFetch<Deuda>('/deudas', { method: 'POST', body: JSON.stringify(d) }),
+    update: (
+      id: string,
+      d: {
+        nombre: string;
+        moneda: Moneda;
+        saldo: number;
+        saldoInicial?: number;
+        cuota?: number;
+        frecDias?: number;
+        proxima?: string;
+      },
+    ) => apiFetch<Deuda>(`/deudas/${id}`, { method: 'PUT', body: JSON.stringify(d) }),
     abonar: (id: string, a: { monto: number; fecha?: string }) =>
       apiFetch<{ deuda: Deuda; movimiento: Movimiento }>(`/deudas/${id}/abonos`, {
         method: 'POST',

@@ -51,6 +51,16 @@ class DeudaDto {
   @IsOptional() @Matches(/^\d{4}-\d{2}-\d{2}$/) proxima?: string;
 }
 
+class EditarDeudaDto {
+  @IsString() @MinLength(1) nombre: string;
+  @IsIn(MONEDAS) moneda: 'USDT' | 'USD_BCV' | 'BS';
+  @IsNumber() @Min(0) saldo: number;
+  @IsOptional() @IsNumber() @Min(0) saldoInicial?: number;
+  @IsOptional() @IsNumber() @Min(0) cuota?: number;
+  @IsOptional() @IsInt() @Min(0) frecDias?: number;
+  @IsOptional() @Matches(/^\d{4}-\d{2}-\d{2}$/) proxima?: string;
+}
+
 class AbonoDto {
   @IsNumber() @Min(0.01) monto: number;
   @IsOptional() @Matches(/^\d{4}-\d{2}-\d{2}$/) fecha?: string;
@@ -173,6 +183,28 @@ export class DeudasController {
       frecDias: dto.frecDias ?? 0,
       proxima: dto.proxima ?? null,
     });
+  }
+
+  // Edita los datos de una deuda. Si suben el saldo por encima del inicial,
+  // el inicial se ajusta para que la barra de progreso siga teniendo sentido.
+  @Put(':id')
+  async editar(
+    @UserId() userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: EditarDeudaDto,
+  ) {
+    const deuda = await this.deudas.findOneBy({ id, userId });
+    if (!deuda) throw new NotFoundException('Deuda no encontrada');
+    Object.assign(deuda, {
+      nombre: dto.nombre,
+      moneda: dto.moneda,
+      saldo: dto.saldo,
+      saldoInicial: Math.max(dto.saldoInicial ?? deuda.saldoInicial, dto.saldo),
+      cuota: dto.cuota ?? deuda.cuota,
+      frecDias: dto.frecDias ?? deuda.frecDias,
+      proxima: dto.proxima ?? deuda.proxima,
+    });
+    return this.deudas.save(deuda);
   }
 
   // Registra un abono: descuenta saldo, crea el movimiento y corre la próxima fecha

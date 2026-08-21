@@ -1,13 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import type { AppData } from '@/app/page';
 import { costoUSDT, fmt, mesActual, nombreMes } from '@/lib/finanzas';
-import { Barra, Tarjeta } from '@/components/ui';
+import { Barra, Tarjeta, iconos } from '@/components/ui';
+import GastoRapido from '@/components/GastoRapido';
 
 const PALETA = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#f97316', '#06b6d4', '#ec4899', '#84cc16', '#64748b'];
 
 export default function Resumen({ app }: { app: AppData }) {
   const { tasas, perfil, categorias, deudas, metas, movimientos } = app;
+  // Registro rápido de gastos del día: se abre con la categoría ya elegida
+  const [rapido, setRapido] = useState<{ abierto: boolean; cat?: string }>({ abierto: false });
   const c = (monto: number, moneda: Parameters<typeof costoUSDT>[1]) =>
     costoUSDT(monto, moneda, tasas, perfil.ajuste);
 
@@ -67,17 +71,29 @@ export default function Resumen({ app }: { app: AppData }) {
               ).getDate();
               return (
                 <Tarjeta key={tipo} className="flex flex-col gap-3">
-                  <div className="flex items-baseline justify-between gap-2">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <h3 className="text-sm font-semibold">
                       {tipo === 'fijo' ? 'Gastos fijos' : 'Gastos diarios'}
                       <span className="ml-2 text-xs font-normal text-sutil">
-                        {tipo === 'fijo' ? 'mensuales' : `≈ $${fmt(planGrupo / diasMes)} al día`}
+                        {tipo === 'fijo'
+                          ? 'mensuales'
+                          : `≈ $${fmt(planGrupo / diasMes)} al día`}
                       </span>
                     </h3>
                     <p className="text-sm">
                       <b>${fmt(usadoGrupo)}</b>{' '}
                       <span className="text-sutil">/ ${fmt(planGrupo)}</span>
                     </p>
+                    {tipo === 'diario' && esMesActual && (
+                      <p className="w-full text-xs text-sutil">
+                        Te quedan{' '}
+                        <b className={planGrupo - usadoGrupo < 0 ? 'text-rojo' : 'text-verde'}>
+                          ${fmt(Math.max(0, planGrupo - usadoGrupo))}
+                        </b>{' '}
+                        para los {diasMes - new Date().getDate() + 1} días que faltan del mes ·{' '}
+                        <b>${fmt(Math.max(0, planGrupo - usadoGrupo) / (diasMes - new Date().getDate() + 1))} por día</b>
+                      </p>
+                    )}
                   </div>
                   {grupo.map((cat) => {
                     const plan = c(cat.monto, cat.moneda);
@@ -86,7 +102,16 @@ export default function Resumen({ app }: { app: AppData }) {
                     return (
                       <div key={cat.id}>
                         <div className="flex items-baseline justify-between gap-2 text-sm">
-                          <span>
+                          <span className="flex items-center gap-1.5">
+                            {tipo === 'diario' && (
+                              <button
+                                onClick={() => setRapido({ abierto: true, cat: cat.id })}
+                                aria-label={`Anotar gasto de ${cat.nombre}`}
+                                className="flex size-7 cursor-pointer items-center justify-center rounded-lg border border-borde bg-panel2 text-verde transition-colors hover:bg-verde hover:text-white"
+                              >
+                                {iconos.mas({ className: 'size-4' })}
+                              </button>
+                            )}
                             {cat.nombre}
                             {cat.moneda === 'USD_BCV' && (
                               <span className="ml-1.5 rounded-full border border-borde px-1.5 py-px text-[10px] text-ambar">
@@ -151,6 +176,22 @@ export default function Resumen({ app }: { app: AppData }) {
           </Tarjeta>
         </section>
       )}
+
+      {/* Botón flotante: anotar un gasto del día en dos toques */}
+      <button
+        onClick={() => setRapido({ abierto: true })}
+        aria-label="Anotar gasto rápido"
+        className="fixed bottom-20 right-4 z-30 flex min-h-14 cursor-pointer items-center gap-2 rounded-full bg-verde-oscuro px-5 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-verde"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        {iconos.mas()} Gasto rápido
+      </button>
+      <GastoRapido
+        app={app}
+        abierto={rapido.abierto}
+        categoriaInicial={rapido.cat}
+        onCerrar={() => setRapido({ abierto: false })}
+      />
 
       {/* Estadísticas: dona por categoría */}
       <section aria-label="Gastos por categoría">

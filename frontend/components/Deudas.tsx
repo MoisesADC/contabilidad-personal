@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { AppData } from '@/app/page';
 import { api, type Deuda, type Moneda } from '@/lib/api';
 import { costoUSDT, etiquetaMoneda, fmt, hoy } from '@/lib/finanzas';
@@ -17,6 +17,7 @@ export default function Deudas({ app }: { app: AppData }) {
   const { deudas, tasas, perfil } = app;
   const [modal, setModal] = useState<'normal' | 'cashea' | null>(null);
   const [pagando, setPagando] = useState<Deuda | null>(null);
+  const [editando, setEditando] = useState<Deuda | null>(null);
 
   async function borrar(d: Deuda) {
     if (!confirm(`¿Eliminar la deuda "${d.nombre}"? El historial de abonos se conserva.`)) return;
@@ -76,6 +77,7 @@ export default function Deudas({ app }: { app: AppData }) {
             </div>
             <div className="mt-3 flex gap-2">
               {d.saldo > 0 && <Boton variante="verde" className="!min-h-9 !text-xs" onClick={() => setPagando(d)}>Registrar abono</Boton>}
+              <Boton variante="secundario" className="!min-h-9 !text-xs" onClick={() => setEditando(d)}>Editar</Boton>
               <Boton variante="peligro" className="!min-h-9 !text-xs" onClick={() => borrar(d)}>Eliminar</Boton>
             </div>
           </Tarjeta>
@@ -84,6 +86,7 @@ export default function Deudas({ app }: { app: AppData }) {
 
       <ModalDeuda modo={modal} onCerrar={() => setModal(null)} app={app} />
       <ModalAbono deuda={pagando} onCerrar={() => setPagando(null)} app={app} />
+      <ModalEditar deuda={editando} onCerrar={() => setEditando(null)} app={app} />
     </div>
   );
 }
@@ -233,6 +236,92 @@ function ModalAbono({ deuda, onCerrar, app }: { deuda: Deuda | null; onCerrar: (
         <div className="flex justify-end gap-2">
           <Boton variante="secundario" onClick={onCerrar}>Cancelar</Boton>
           <Boton variante="verde" onClick={guardar}>Registrar</Boton>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function ModalEditar({ deuda, onCerrar, app }: { deuda: Deuda | null; onCerrar: () => void; app: AppData }) {
+  const toast = useToast();
+  const [nombre, setNombre] = useState('');
+  const [saldo, setSaldo] = useState('');
+  const [moneda, setMoneda] = useState<Moneda>('USDT');
+  const [cuota, setCuota] = useState('');
+  const [frec, setFrec] = useState('30');
+  const [proxima, setProxima] = useState('');
+
+  // Cada vez que se abre, se cargan los datos actuales de esa deuda
+  useEffect(() => {
+    if (!deuda) return;
+    setNombre(deuda.nombre);
+    setSaldo(String(deuda.saldo));
+    setMoneda(deuda.moneda);
+    setCuota(deuda.cuota ? String(deuda.cuota) : '');
+    setFrec(String(deuda.frecDias ?? 0));
+    setProxima(deuda.proxima ?? '');
+  }, [deuda]);
+
+  async function guardar() {
+    const s = parseFloat(saldo);
+    if (!deuda || !nombre.trim() || isNaN(s)) return toast('Revisa el nombre y el saldo', true);
+    try {
+      await api.deudas.update(deuda.id, {
+        nombre: nombre.trim(),
+        moneda,
+        saldo: s,
+        cuota: parseFloat(cuota) || 0,
+        frecDias: parseInt(frec) || 0,
+        proxima: proxima || undefined,
+      });
+      onCerrar();
+      await app.recargar();
+      toast('Deuda actualizada ✓');
+    } catch (e) {
+      toast((e as Error).message, true);
+    }
+  }
+
+  return (
+    <Modal abierto={deuda !== null} titulo={`Editar — ${deuda?.nombre ?? ''}`} onCerrar={onCerrar}>
+      <div className="flex flex-col gap-3">
+        <Campo etiqueta="Nombre">
+          <input value={nombre} onChange={(e) => setNombre(e.target.value)} className={estiloInput} />
+        </Campo>
+        <Campo etiqueta="Saldo pendiente">
+          <input type="number" inputMode="decimal" value={saldo} onChange={(e) => setSaldo(e.target.value)} className={estiloInput} />
+        </Campo>
+        <Campo etiqueta="Moneda de la deuda">
+          <select value={moneda} onChange={(e) => setMoneda(e.target.value as Moneda)} className={estiloInput}>
+            <option value="USDT">USDT / dólar real</option>
+            <option value="USD_BCV">Dólares tasa BCV (tiendas)</option>
+          </select>
+        </Campo>
+        <Campo etiqueta="Cuota o abono planeado">
+          <input type="number" inputMode="decimal" value={cuota} onChange={(e) => setCuota(e.target.value)} className={estiloInput} />
+        </Campo>
+        <Campo etiqueta="Frecuencia">
+          <select value={frec} onChange={(e) => setFrec(e.target.value)} className={estiloInput}>
+            <option value="30">Mensual</option>
+            <option value="14">Quincenal</option>
+            <option value="7">Semanal</option>
+            <option value="0">Sin fecha fija</option>
+          </select>
+        </Campo>
+        <Campo etiqueta="Próximo pago">
+          <input type="date" value={proxima} onChange={(e) => setProxima(e.target.value)} className={estiloInput} />
+        </Campo>
+        {deuda && parseFloat(saldo) > 0 && moneda === 'USD_BCV' && (
+          <p className="text-xs text-sutil">
+            Costo real del saldo:{' '}
+            <b className="text-verde">
+              ${fmt(costoUSDT(parseFloat(saldo), 'USD_BCV', app.tasas, app.perfil.ajuste))} USDT
+            </b>
+          </p>
+        )}
+        <div className="flex justify-end gap-2">
+          <Boton variante="secundario" onClick={onCerrar}>Cancelar</Boton>
+          <Boton variante="verde" onClick={guardar}>Guardar cambios</Boton>
         </div>
       </div>
     </Modal>

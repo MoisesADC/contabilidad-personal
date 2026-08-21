@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
       const t0 = Date.now();
       cachedServer = await Promise.race([
         arrancar(),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('Arranque de Nest superó 9s')), 9000)),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('Arranque de Nest superó 50s')), 50000)),
       ]);
       console.log('Nest arrancó en', Date.now() - t0, 'ms');
     }

@@ -3,7 +3,9 @@
   "outputDirectory": "public",
   "functions": {
     "api/index.js": {
-      "includeFiles": "dist/**"
+      "includeFiles": "dist/**",
+      "maxDuration": 60,
+      "memory": 1769
     }
   },
   "rewrites": [{ "source": "/api/(.*)", "destination": "/api/index" }]

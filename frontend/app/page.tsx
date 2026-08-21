@@ -13,7 +13,7 @@ import {
   type Perfil,
   type Tasas,
 } from '@/lib/api';
-import { binanceEfectiva, costoUSDT, fmt, mesActual } from '@/lib/finanzas';
+import { binanceEfectiva, convertir, etiquetaMoneda, fmt, mesActual } from '@/lib/finanzas';
 import { Boton, Campo, Tarjeta, ToastProvider, estiloInput, iconos, useToast } from '@/components/ui';
 import Resumen from '@/components/Resumen';
 import Movimientos from '@/components/Movimientos';
@@ -286,9 +286,11 @@ function BarraTasas({ app, onActualizar }: { app: AppData; onActualizar: () => v
   const { tasas, perfil } = app;
   const ef = binanceEfectiva(tasas, perfil.ajuste);
   const [calcMonto, setCalcMonto] = useState('');
-  const [calcMoneda, setCalcMoneda] = useState<Moneda>('USD_BCV');
+  const [calcMoneda, setCalcMoneda] = useState<Moneda>('USDT');
   const monto = parseFloat(calcMonto);
-  const costo = monto > 0 ? costoUSDT(monto, calcMoneda, tasas, perfil.ajuste) : null;
+  const hayMonto = monto > 0;
+  // Las otras dos monedas, en orden fijo, para mostrar ambas conversiones
+  const destinos = (['USDT', 'BS', 'USD_BCV'] as Moneda[]).filter((m) => m !== calcMoneda);
 
   return (
     <header className="flex flex-col gap-2">
@@ -304,7 +306,7 @@ function BarraTasas({ app, onActualizar }: { app: AppData; onActualizar: () => v
           <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
             <Chip etiqueta="BCV oficial" valor={fmt(tasas.bcv)} color="text-ambar" />
             <Chip etiqueta="Binance P2P" valor={fmt(tasas.binance)} />
-            <Chip etiqueta={`Tu tasa real (Estimado -${fmt(perfil.ajuste, 1)}%)`} valor={fmt(ef)} color="text-verde" />
+            <Chip etiqueta={`Estimado (-${fmt(perfil.ajuste, 1)}%)`} valor={fmt(ef)} color="text-verde" />
             <Chip etiqueta="Brecha" valor={fmt((ef / tasas.bcv - 1) * 100, 1) + '%'} />
             <Chip etiqueta="$1 BCV te cuesta" valor={'$' + fmt(tasas.bcv / ef, 3)} color="text-verde" />
             <Boton variante="secundario" onClick={onActualizar} className="ml-auto !min-h-9 !px-3 !text-xs">
@@ -316,39 +318,54 @@ function BarraTasas({ app, onActualizar }: { app: AppData; onActualizar: () => v
 
       <details className="group">
         <summary className="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-borde bg-panel px-4 py-2.5 text-sm font-semibold [&::-webkit-details-marker]:hidden">
-          Calculadora: ¿cuánto me cuesta de verdad?
+          Calculadora de cambio
           <span className="ml-auto text-sutil transition-transform duration-200 group-open:rotate-180">▾</span>
         </summary>
         <div className="rounded-b-xl border border-t-0 border-borde bg-panel px-4 py-3">
           <div className="flex flex-wrap items-end gap-3">
-            <Campo etiqueta="Monto">
+            <Campo etiqueta="Tengo">
               <input
                 type="number"
                 inputMode="decimal"
                 value={calcMonto}
                 onChange={(e) => setCalcMonto(e.target.value)}
-                placeholder="50"
+                placeholder="100"
                 className={`${estiloInput} max-w-32`}
               />
             </Campo>
-            <Campo etiqueta="Expresado en">
+            <Campo etiqueta="En">
               <select
                 value={calcMoneda}
                 onChange={(e) => setCalcMoneda(e.target.value as Moneda)}
                 className={`${estiloInput} max-w-44`}
               >
-                <option value="USD_BCV">Dólares (tasa BCV)</option>
-                <option value="BS">Bolívares</option>
                 <option value="USDT">USDT / dólar real</option>
+                <option value="BS">Bolívares</option>
+                <option value="USD_BCV">Dólares (tasa BCV)</option>
               </select>
             </Campo>
-            <p className="pb-2 text-base font-semibold text-verde">
-              {costo != null ? `= ${fmt(costo)} USDT tuyos` : '= …'}
-            </p>
+            <div className="flex flex-wrap gap-4 pb-1">
+              {destinos.map((d) => (
+                <div key={d}>
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-sutil">
+                    {etiquetaMoneda[d]}
+                  </p>
+                  <p className="text-base font-semibold text-verde">
+                    {hayMonto
+                      ? fmt(convertir(monto, calcMoneda, d, tasas, perfil.ajuste), d === 'BS' ? 0 : 2)
+                      : '…'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-          {costo != null && calcMoneda === 'USD_BCV' && (
+          {hayMonto && (
             <p className="mt-1 text-xs text-sutil">
-              Son {fmt(monto * tasas.bcv, 0)} Bs a tasa BCV. Te ahorras ${fmt(monto - costo)} por la brecha.
+              {calcMoneda === 'USD_BCV'
+                ? `Un precio de $${fmt(monto)} a tasa BCV te cuesta ${fmt(convertir(monto, 'USD_BCV', 'USDT', tasas, perfil.ajuste))} USDT reales: te ahorras $${fmt(monto - convertir(monto, 'USD_BCV', 'USDT', tasas, perfil.ajuste))} por la brecha.`
+                : calcMoneda === 'USDT'
+                  ? `Vendiendo a tu tasa estimada de ${fmt(binanceEfectiva(tasas, perfil.ajuste))} Bs por dólar.`
+                  : `A tu tasa estimada de ${fmt(binanceEfectiva(tasas, perfil.ajuste))} Bs por USDT.`}
             </p>
           )}
         </div>

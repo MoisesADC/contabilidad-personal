@@ -44,46 +44,85 @@ export default function Resumen({ app }: { app: AppData }) {
         <TarjetaDato etiqueta="Ahorrado en metas" valor={'$' + fmt(ahorrado, 0)} color="text-primario" nota={`${metas.length} metas activas`} />
       </div>
 
-      {/* Presupuesto */}
+      {/* Presupuesto: gastos fijos y diarios por separado */}
       <section aria-label="Presupuesto del mes">
         <h2 className="mb-2 text-sm font-semibold">
           Presupuesto <span className="font-normal text-sutil">· {nombreMes(app.mes)}</span>
         </h2>
-        <Tarjeta className="flex flex-col gap-3 !p-4">
-          {categorias.length === 0 && (
+        {categorias.length === 0 ? (
+          <Tarjeta>
             <p className="text-sm text-sutil">Crea tus categorías de presupuesto en Ajustes.</p>
-          )}
-          {categorias.map((cat) => {
-            const plan = c(cat.monto, cat.moneda);
-            const usado = porCategoria.get(cat.id) ?? 0;
-            const pct = plan > 0 ? (usado / plan) * 100 : 0;
-            return (
-              <div key={cat.id}>
-                <div className="flex items-baseline justify-between gap-2 text-sm">
-                  <span>
-                    {cat.nombre}
-                    {cat.moneda === 'USD_BCV' && (
-                      <span className="ml-1.5 rounded-full border border-borde px-1.5 py-px text-[10px] text-ambar">BCV</span>
-                    )}
-                  </span>
-                  <span className="text-sutil">
-                    ${fmt(usado)} <span className="text-xs">/ ${fmt(plan)}</span>
-                  </span>
-                </div>
-                <Barra pct={pct} color={pct >= 100 ? 'var(--color-rojo)' : pct > 90 ? 'var(--color-ambar)' : 'var(--color-verde)'} />
-              </div>
-            );
-          })}
-          {categorias.length > 0 && (
-            <p className="border-t border-borde pt-2 text-right text-sm">
+          </Tarjeta>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {(['fijo', 'diario'] as const).map((tipo) => {
+              const grupo = categorias.filter((cat) => (cat.tipo ?? 'fijo') === tipo);
+              if (grupo.length === 0) return null;
+              const planGrupo = grupo.reduce((sum, cat) => sum + c(cat.monto, cat.moneda), 0);
+              const usadoGrupo = grupo.reduce((sum, cat) => sum + (porCategoria.get(cat.id) ?? 0), 0);
+              const diasMes = new Date(
+                Number(app.mes.slice(0, 4)),
+                Number(app.mes.slice(5, 7)),
+                0,
+              ).getDate();
+              return (
+                <Tarjeta key={tipo} className="flex flex-col gap-3">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 className="text-sm font-semibold">
+                      {tipo === 'fijo' ? 'Gastos fijos' : 'Gastos diarios'}
+                      <span className="ml-2 text-xs font-normal text-sutil">
+                        {tipo === 'fijo' ? 'mensuales' : `≈ $${fmt(planGrupo / diasMes)} al día`}
+                      </span>
+                    </h3>
+                    <p className="text-sm">
+                      <b>${fmt(usadoGrupo)}</b>{' '}
+                      <span className="text-sutil">/ ${fmt(planGrupo)}</span>
+                    </p>
+                  </div>
+                  {grupo.map((cat) => {
+                    const plan = c(cat.monto, cat.moneda);
+                    const usado = porCategoria.get(cat.id) ?? 0;
+                    const pct = plan > 0 ? (usado / plan) * 100 : 0;
+                    return (
+                      <div key={cat.id}>
+                        <div className="flex items-baseline justify-between gap-2 text-sm">
+                          <span>
+                            {cat.nombre}
+                            {cat.moneda === 'USD_BCV' && (
+                              <span className="ml-1.5 rounded-full border border-borde px-1.5 py-px text-[10px] text-ambar">
+                                BCV
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-sutil">
+                            ${fmt(usado)} <span className="text-xs">/ ${fmt(plan)}</span>
+                          </span>
+                        </div>
+                        <Barra
+                          pct={pct}
+                          color={
+                            pct >= 100
+                              ? 'var(--color-rojo)'
+                              : pct > 90
+                                ? 'var(--color-ambar)'
+                                : 'var(--color-verde)'
+                          }
+                        />
+                      </div>
+                    );
+                  })}
+                </Tarjeta>
+              );
+            })}
+            <p className="text-right text-sm">
               Plan total <b>${fmt(totalPlan)}</b> · Gastado <b>${fmt(gastado)}</b> ·{' '}
               <b className={perfil.income - gastado < 0 ? 'text-rojo' : 'text-verde'}>
                 ${fmt(perfil.income - gastado)}
               </b>{' '}
               <span className="text-sutil">libres</span>
             </p>
-          )}
-        </Tarjeta>
+          </div>
+        )}
       </section>
 
       {/* Próximos pagos */}

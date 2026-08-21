@@ -4,6 +4,9 @@ import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 // USDT = dólar real · USD_BCV = dólares a tasa oficial · BS = bolívares
 export type Moneda = 'USDT' | 'USD_BCV' | 'BS';
 
+// Clasificación del gasto de una categoría
+export type TipoGasto = 'fijo' | 'diario';
+
 @Entity('app_perfiles')
 export class Perfil {
   @PrimaryColumn('uuid', { name: 'user_id' })
@@ -32,6 +35,10 @@ export class Categoria {
 
   @Column('text', { default: 'USDT' })
   moneda: Moneda;
+
+  // 'fijo' = gasto mensual predecible · 'diario' = gasto variable del día a día
+  @Column('text', { default: 'fijo' })
+  tipo: TipoGasto;
 }
 
 @Entity('app_deudas')

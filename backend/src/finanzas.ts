@@ -39,6 +39,7 @@ class CategoriaDto {
   @IsString() @MinLength(1) nombre: string;
   @IsNumber() @Min(0) monto: number;
   @IsIn(MONEDAS) moneda: 'USDT' | 'USD_BCV' | 'BS';
+  @IsOptional() @IsIn(['fijo', 'diario']) tipo?: 'fijo' | 'diario';
 }
 
 class DeudaDto {
@@ -124,7 +125,7 @@ export class CategoriasController {
 
   @Post()
   crear(@UserId() userId: string, @Body() dto: CategoriaDto) {
-    return this.repo.save({ userId, ...dto });
+    return this.repo.save({ userId, ...dto, tipo: dto.tipo ?? 'fijo' });
   }
 
   @Put(':id')
@@ -135,7 +136,7 @@ export class CategoriasController {
   ) {
     const cat = await this.repo.findOneBy({ id, userId });
     if (!cat) throw new NotFoundException('Categoría no encontrada');
-    return this.repo.save({ ...cat, ...dto });
+    return this.repo.save({ ...cat, ...dto, tipo: dto.tipo ?? cat.tipo ?? 'fijo' });
   }
 
   @Delete(':id')

@@ -18,11 +18,15 @@ export interface Perfil {
   ajuste: number;
 }
 
+// 'fijo' = gasto mensual predecible · 'diario' = gasto variable del día a día
+export type TipoGasto = 'fijo' | 'diario';
+
 export interface Categoria {
   id: string;
   nombre: string;
   monto: number;
   moneda: Moneda;
+  tipo: TipoGasto;
 }
 
 export interface Deuda {

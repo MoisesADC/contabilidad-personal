@@ -12,6 +12,22 @@ export function costoUSDT(monto: number, moneda: Moneda, t: Tasas, ajuste: numbe
   return monto;
 }
 
+// Convierte un monto entre cualquiera de las tres monedas.
+// Puente: primero se lleva a USDT (dólar real) y de ahí al destino.
+export function convertir(
+  monto: number,
+  desde: Moneda,
+  hacia: Moneda,
+  t: Tasas,
+  ajuste: number,
+) {
+  const enUsdt = costoUSDT(monto, desde, t, ajuste);
+  const ef = binanceEfectiva(t, ajuste);
+  if (hacia === 'USDT') return enUsdt;
+  if (hacia === 'BS') return enUsdt * ef;
+  return (enUsdt * ef) / t.bcv; // USD_BCV
+}
+
 export const fmt = (n: number | null | undefined, dec = 2) =>
   n == null || isNaN(n)
     ? '—'

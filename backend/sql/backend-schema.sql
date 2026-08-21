@@ -58,3 +58,7 @@ alter table public.app_categorias enable row level security;
 alter table public.app_deudas enable row level security;
 alter table public.app_metas enable row level security;
 alter table public.app_movimientos enable row level security;
+
+-- Tipo de gasto de cada categoría: 'fijo' (mensual, predecible) o 'diario' (variable)
+alter table public.app_categorias
+  add column if not exists tipo text not null default 'fijo';

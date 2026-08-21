@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { AppData } from '@/app/page';
-import { api, type Moneda } from '@/lib/api';
+import { api, type Moneda, type TipoGasto } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import { claveIA } from '@/components/Movimientos';
 import { Boton, Campo, Tarjeta, estiloInput, iconos, useToast } from '@/components/ui';
@@ -16,6 +16,7 @@ export default function Ajustes({ app }: { app: AppData }) {
   const [nuevaCat, setNuevaCat] = useState('');
   const [nuevoMonto, setNuevoMonto] = useState('');
   const [nuevaMoneda, setNuevaMoneda] = useState<Moneda>('USDT');
+  const [nuevoTipo, setNuevoTipo] = useState<TipoGasto>('fijo');
 
   async function guardarPerfil() {
     try {
@@ -30,7 +31,12 @@ export default function Ajustes({ app }: { app: AppData }) {
   async function crearCategoria() {
     if (!nuevaCat.trim()) return toast('Ponle nombre a la categoría', true);
     try {
-      await api.categorias.create({ nombre: nuevaCat.trim(), monto: parseFloat(nuevoMonto) || 0, moneda: nuevaMoneda });
+      await api.categorias.create({
+        nombre: nuevaCat.trim(),
+        monto: parseFloat(nuevoMonto) || 0,
+        moneda: nuevaMoneda,
+        tipo: nuevoTipo,
+      });
       setNuevaCat(''); setNuevoMonto('');
       await app.recargar();
       toast('Categoría creada ✓');
@@ -76,10 +82,22 @@ export default function Ajustes({ app }: { app: AppData }) {
       <section aria-label="Categorías de presupuesto">
         <h2 className="mb-2 text-sm font-semibold">Categorías y presupuesto</h2>
         <Tarjeta className="flex flex-col gap-2">
+          <p className="mb-1 text-xs text-sutil">
+            <b>Fijos</b>: los que pagas igual cada mes (alquiler, cooperativas, servicios).{' '}
+            <b>Diarios</b>: los del día a día (comida, transporte, calle).
+          </p>
           {categorias.map((c) => (
-            <FilaCategoria key={c.id} app={app} id={c.id} nombre={c.nombre} monto={c.monto} moneda={c.moneda} />
+            <FilaCategoria
+              key={c.id}
+              app={app}
+              id={c.id}
+              nombre={c.nombre}
+              monto={c.monto}
+              moneda={c.moneda}
+              tipo={c.tipo ?? 'fijo'}
+            />
           ))}
-          <div className="mt-1 grid grid-cols-[1fr_90px_100px_auto] items-end gap-2 border-t border-borde pt-3">
+          <div className="mt-1 grid grid-cols-2 items-end gap-2 border-t border-borde pt-3 sm:grid-cols-[1fr_80px_100px_110px_auto]">
             <Campo etiqueta="Nueva categoría">
               <input value={nuevaCat} onChange={(e) => setNuevaCat(e.target.value)} placeholder="Nombre" className={estiloInput} />
             </Campo>
@@ -90,6 +108,12 @@ export default function Ajustes({ app }: { app: AppData }) {
               <select value={nuevaMoneda} onChange={(e) => setNuevaMoneda(e.target.value as Moneda)} className={estiloInput}>
                 <option value="USDT">USDT</option>
                 <option value="USD_BCV">USD BCV</option>
+              </select>
+            </Campo>
+            <Campo etiqueta="Tipo de gasto">
+              <select value={nuevoTipo} onChange={(e) => setNuevoTipo(e.target.value as TipoGasto)} className={estiloInput}>
+                <option value="fijo">Fijo</option>
+                <option value="diario">Diario</option>
               </select>
             </Campo>
             <Boton variante="secundario" onClick={crearCategoria} aria-label="Agregar categoría">
@@ -121,16 +145,17 @@ export default function Ajustes({ app }: { app: AppData }) {
   );
 }
 
-function FilaCategoria({ app, id, nombre, monto, moneda }: { app: AppData; id: string; nombre: string; monto: number; moneda: Moneda }) {
+function FilaCategoria({ app, id, nombre, monto, moneda, tipo }: { app: AppData; id: string; nombre: string; monto: number; moneda: Moneda; tipo: TipoGasto }) {
   const toast = useToast();
   const [n, setN] = useState(nombre);
   const [m, setM] = useState(String(monto));
   const [mon, setMon] = useState<Moneda>(moneda);
+  const [tip, setTip] = useState<TipoGasto>(tipo);
 
   async function guardar() {
     if (!n.trim()) return toast('El nombre no puede quedar vacío', true);
     try {
-      await api.categorias.update(id, { nombre: n.trim(), monto: parseFloat(m) || 0, moneda: mon });
+      await api.categorias.update(id, { nombre: n.trim(), monto: parseFloat(m) || 0, moneda: mon, tipo: tip });
       await app.recargar();
       toast('Categoría actualizada ✓');
     } catch (e) {
@@ -148,15 +173,19 @@ function FilaCategoria({ app, id, nombre, monto, moneda }: { app: AppData; id: s
     }
   }
 
-  const cambiado = n !== nombre || parseFloat(m) !== monto || mon !== moneda;
+  const cambiado = n !== nombre || parseFloat(m) !== monto || mon !== moneda || tip !== tipo;
 
   return (
-    <div className="grid grid-cols-[1fr_90px_100px_auto] items-center gap-2">
+    <div className="grid grid-cols-2 items-center gap-2 sm:grid-cols-[1fr_80px_100px_110px_auto]">
       <input value={n} onChange={(e) => setN(e.target.value)} className={estiloInput} aria-label={`Nombre de ${nombre}`} />
       <input type="number" inputMode="decimal" value={m} onChange={(e) => setM(e.target.value)} className={estiloInput} aria-label={`Plan de ${nombre}`} />
       <select value={mon} onChange={(e) => setMon(e.target.value as Moneda)} className={estiloInput} aria-label={`Moneda de ${nombre}`}>
         <option value="USDT">USDT</option>
         <option value="USD_BCV">USD BCV</option>
+      </select>
+      <select value={tip} onChange={(e) => setTip(e.target.value as TipoGasto)} className={estiloInput} aria-label={`Tipo de gasto de ${nombre}`}>
+        <option value="fijo">Fijo</option>
+        <option value="diario">Diario</option>
       </select>
       <div className="flex gap-1">
         {cambiado && (

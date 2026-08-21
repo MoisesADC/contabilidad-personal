@@ -1,16 +1,17 @@
 // Adaptador para correr NestJS como función serverless en Vercel.
-// Arranca la app una sola vez por instancia y reutiliza la conexión.
-const { NestFactory } = require('@nestjs/core');
-const { ExpressAdapter } = require('@nestjs/platform-express');
-const { ValidationPipe } = require('@nestjs/common');
-const express = require('express');
-const { AppModule } = require('../dist/app.module');
-
+// Todos los require van DENTRO del try para poder reportar cualquier
+// fallo de carga (módulo faltante, dist no incluido, etc.).
 let cachedServer = null;
 
 module.exports = async (req, res) => {
   try {
     if (!cachedServer) {
+      const { NestFactory } = require('@nestjs/core');
+      const { ExpressAdapter } = require('@nestjs/platform-express');
+      const { ValidationPipe } = require('@nestjs/common');
+      const express = require('express');
+      const { AppModule } = require('../dist/app.module');
+
       const server = express();
       const app = await NestFactory.create(AppModule, new ExpressAdapter(server), {
         logger: ['error', 'warn'],
@@ -28,7 +29,8 @@ module.exports = async (req, res) => {
     res.end(
       JSON.stringify({
         errorArranque: String((e && e.message) || e),
-        tipo: e && e.constructor && e.constructor.name,
+        codigo: e && e.code,
+        pila: e && e.stack ? String(e.stack).split('\n').slice(0, 4) : null,
       }),
     );
   }

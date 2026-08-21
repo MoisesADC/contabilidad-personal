@@ -66,23 +66,44 @@ function Shell() {
   return <App email={session.user.email ?? ''} />;
 }
 
-// ── Pantalla de inicio de sesión ─────────────────────────────────
+// ── Pantalla de inicio de sesión (correo + contraseña) ───────────
 function Login() {
   const toast = useToast();
+  const [modo, setModo] = useState<'entrar' | 'crear'>('entrar');
   const [email, setEmail] = useState('');
-  const [enviado, setEnviado] = useState(false);
+  const [clave, setClave] = useState('');
+  const [clave2, setClave2] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [confirmarCorreo, setConfirmarCorreo] = useState(false);
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
+    if (clave.length < 8) return toast('La contraseña debe tener al menos 8 caracteres', true);
+    if (modo === 'crear' && clave !== clave2) return toast('Las contraseñas no coinciden', true);
     setCargando(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: true, emailRedirectTo: window.location.origin },
-    });
-    setCargando(false);
-    if (error) return toast('Error: ' + error.message, true);
-    setEnviado(true);
+    try {
+      if (modo === 'crear') {
+        const { data, error } = await supabase.auth.signUp({ email, password: clave });
+        if (error) throw error;
+        if (!data.session) {
+          setConfirmarCorreo(true);
+          return;
+        }
+        toast('¡Cuenta creada! Bienvenido 🎉');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password: clave });
+        if (error)
+          throw new Error(
+            /invalid login/i.test(error.message)
+              ? 'Correo o contraseña incorrectos'
+              : error.message,
+          );
+      }
+    } catch (err) {
+      toast((err as Error).message, true);
+    } finally {
+      setCargando(false);
+    }
   }
 
   return (
@@ -94,32 +115,71 @@ function Login() {
         </p>
       </div>
       <Tarjeta>
-        {enviado ? (
+        {confirmarCorreo ? (
           <div className="text-sm leading-relaxed">
-            <p className="font-semibold text-verde">Correo enviado ✓</p>
+            <p className="font-semibold text-verde">Cuenta creada ✓</p>
             <p className="mt-2 text-sutil">
-              Abre tu correo (revisa también spam) y toca el enlace{' '}
-              <b className="text-texto">Sign in</b> desde este mismo dispositivo. El correo
-              puede tardar 1-2 minutos.
+              Revisa tu correo (también spam) y toca el enlace de confirmación. Después vuelve
+              aquí y entra con tu contraseña.
             </p>
           </div>
         ) : (
           <form onSubmit={enviar} className="flex flex-col gap-3">
-            <Campo etiqueta="Tu correo">
+            <div className="mb-1 grid grid-cols-2 gap-1 rounded-lg bg-panel2 p-1" role="tablist">
+              {(['entrar', 'crear'] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="tab"
+                  aria-selected={modo === m}
+                  onClick={() => setModo(m)}
+                  className={`cursor-pointer rounded-md py-2 text-sm font-semibold transition-colors ${
+                    modo === m ? 'bg-primario-fuerte text-white' : 'text-sutil hover:text-texto'
+                  }`}
+                >
+                  {m === 'entrar' ? 'Entrar' : 'Crear cuenta'}
+                </button>
+              ))}
+            </div>
+            <Campo etiqueta="Correo">
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tucorreo@gmail.com"
                 className={estiloInput}
               />
             </Campo>
+            <Campo etiqueta="Contraseña">
+              <input
+                type="password"
+                required
+                autoComplete={modo === 'crear' ? 'new-password' : 'current-password'}
+                value={clave}
+                onChange={(e) => setClave(e.target.value)}
+                placeholder="mínimo 8 caracteres"
+                className={estiloInput}
+              />
+            </Campo>
+            {modo === 'crear' && (
+              <Campo etiqueta="Repite la contraseña">
+                <input
+                  type="password"
+                  required
+                  autoComplete="new-password"
+                  value={clave2}
+                  onChange={(e) => setClave2(e.target.value)}
+                  className={estiloInput}
+                />
+              </Campo>
+            )}
             <Boton type="submit" disabled={cargando}>
-              {cargando ? 'Enviando…' : 'Entrar con mi correo'}
+              {cargando ? 'Un momento…' : modo === 'crear' ? 'Crear mi cuenta' : 'Entrar'}
             </Boton>
             <p className="text-xs text-sutil">
-              Sin contraseñas: te llega un enlace de acceso. Cada usuario ve solo sus datos.
+              Cada usuario tiene su cuenta y ve únicamente sus propios datos.
             </p>
           </form>
         )}
